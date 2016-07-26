@@ -48,19 +48,21 @@ mkdirp(workDirectory, function(err) {
     }, function(err, repos) {
         var i = 0;
         var name = "";
-        async.each(repos, function(repo, callback) {
-            name = repo.name
-            if (!name.startsWith('Kitura')) {
-                callback()
-                return;
-            }
-            console.log('cloning repo ' + name);   
-            Git.Clone(repo.git_url, workDirectory + '/' + name).then(function(cloned) {
-                console.log('cloned repo' + cloned.path())
-                callback()
-            })
-        }, function() {
+        async.each(repos, cloneRepo, function() {
             console.log('finished cloning repos')
         });
     });
 });
+
+function cloneRepo(repo, callback) {
+    name = repo.name
+    if (!name.startsWith('Kitura')) {
+        callback()
+        return;
+    }
+    console.log('cloning repo ' + name);
+    Git.Clone(repo.git_url, workDirectory + '/' + name).then(function(cloned) {
+        console.log('cloned repo' + cloned.path())
+        callback()
+    })
+}
