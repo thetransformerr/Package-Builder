@@ -18,6 +18,8 @@ var GitHubApi = require("github");
 var Git = require("nodegit");
 var mkdirp = require("mkdirp");
 var async = require('async');
+const readline = require('readline');
+const fs = require('fs');
 
 var github = new GitHubApi({
     // optional
@@ -36,30 +38,52 @@ var format = require('date-format');
 var dateString = format.asString('MM_dd_yy', new Date())
 var workDirectory = 'KituraPackagesToUpdate_' + dateString
 
-mkdirp(workDirectory, function(err) {
-    if (err) {
-        console.error(err)
+var reposToUpdate = {};
+
+const reposToUpdateReader = readline.createInterface({
+    input: fs.createReadStream('repos_to_update.txt')
+});
+
+reposToUpdateReader.on('line', function(line) {
+    line = line.split('#')[0]
+    line = line.trim()
+    if (!line) {
         return
     }
-    github.repos.getForOrg({
-        org: "IBM-Swift",
-        type: "all",
-        per_page: 300
-    }, function(err, repos) {
-        var i = 0;
-        var name = "";
-        async.each(repos, cloneRepo, function() {
-            console.log('finished cloning repos')
+    reposToUpdate[line] = true
+});
+
+reposToUpdateReader.on('close', function() {
+    mkdirp(workDirectory, function(err) {
+        if (err) {
+            console.error(err)
+            return
+        }
+        github.repos.getForOrg({
+            org: "IBM-Swift",
+            type: "all",
+            per_page: 300
+        }, function(error, repos) {
+            var i = 0;
+            var name = "";
+            var reposToHandle = []
+
+            if(error) {
+                console.error('Error from getting repositories for IBM-Swift: ' + error);
+                return;
+            }
+            reposToHandle = repos.filter(function(repo) {
+                return reposToUpdate[repo.name]
+            });
+            async.each(reposToHandle, cloneRepo, function() {
+                console.log('finished cloning repos')
+            });
         });
     });
 });
 
 function cloneRepo(repo, callback) {
     name = repo.name
-    if (!name.startsWith('Kitura')) {
-        callback()
-        return;
-    }
     console.log('cloning repo ' + name);
     Git.Clone(repo.git_url, workDirectory + '/' + name).then(function(cloned) {
         console.log('cloned repo' + cloned.path())
