@@ -14,6 +14,15 @@
  * limitations under the License.
  **/
 
+const parameters = getParameters();
+
+const swiftVersion = parameters.swiftVersion;
+const kituraMajor = parameters.kituraMajor;
+const kituraMinor = parameters.kituraMinor;
+
+console.log('setting Kitura Version to ' + kituraMajor + '.' + kituraMinor);
+console.log('setting swift version to ' + swiftVersion);
+
 const GitHubApi = require("github");
 const Git = require("nodegit");
 const mkdirp = require("mkdirp");
@@ -66,14 +75,14 @@ reposToUpdateReader.on('close', function() {
         }, function(error, repos) {
             var i = 0;
             var name = "";
-            var reposToHandle = []
+            var reposToHandle = [];
 
             if(error) {
                 console.error('Error from getting repositories for IBM-Swift: ' + error);
                 return;
             }
             reposToHandle = repos.filter(function(repo) {
-                return reposToUpdate[repo.name]
+                return reposToUpdate[repo.name];
             });
             async.each(reposToHandle, cloneRepo, function() {
                 console.log('finished cloning repos')
@@ -89,4 +98,28 @@ function cloneRepo(repo, callback) {
         console.log('cloned repo' + cloned.path())
         callback()
     })
+}
+
+function getParameters() {
+    const argv = process.argv
+    const exit = process.exit
+
+    if (argv.length < 4) {
+        console.warn('Format: npm start <major Kitura version to set>.<minor Kitura version to set> <swift version to set>')
+        exit();
+    }
+
+    const kituraVersion = argv[2]
+    const swiftVersion = argv[3]
+
+    const kituraVersionComponents = kituraVersion.split('.')
+    if (kituraVersionComponents.length < 2) {
+        console.error('Kitura version parameter should be in the format <major>.<minor>');
+        exit();
+    }
+
+    const kituraMajor = kituraVersionComponents[0];
+    const kituraMinor = kituraVersionComponents[1];
+
+    return { swiftVersion: swiftVersion, kituraMajor: kituraMajor, kituraMinor: kituraMinor }
 }
