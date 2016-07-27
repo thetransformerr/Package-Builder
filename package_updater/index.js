@@ -32,7 +32,7 @@ const fs = require('fs');
 
 const github = new GitHubApi({
     // optional
-    debug: true,
+    debug: false,
     protocol: "https",
     host: "api.github.com", // should be api.github.com for GitHub
     headers: {
