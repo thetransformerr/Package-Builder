@@ -25,7 +25,6 @@ console.log('setting swift version to ' + swiftVersion);
 
 const GitHubApi = require("github");
 const Git = require("nodegit");
-const mkdirp = require("mkdirp");
 const async = require('async');
 const readline = require('readline');
 const fs = require('fs');
@@ -63,7 +62,7 @@ reposToUpdateReader.on('line', function(line) {
 });
 
 reposToUpdateReader.on('close', function() {
-    mkdirp(workDirectory, function(err) {
+    fs.mkdir(workDirectory, function(err) {
         if (err) {
             console.error(err)
             return
