@@ -75,17 +75,20 @@ reposToUpdateReader.on('close', function() {
         }, function(error, repos) {
             var i = 0;
             var name = "";
-            var reposToHandle = [];
 
             if(error) {
                 console.error('Error from getting repositories for IBM-Swift: ' + error);
                 return;
             }
-            reposToHandle = repos.filter(function(repo) {
+            const reposToHandle = repos.filter(function(repo) {
                 return reposToUpdate[repo.name];
             });
-            async.each(reposToHandle, cloneRepo, function() {
-                console.log('finished cloning repos')
+            async.map(reposToHandle, cloneRepo, function(error, repos) {
+                if (error) {
+                    console.error('Error in cloning repos' + error);
+                    return;
+                }
+                console.log('finished cloning ' + repos.length + ' repos')
             });
         });
     });
@@ -96,7 +99,7 @@ function cloneRepo(repo, callback) {
     console.log('cloning repo ' + name);
     Git.Clone(repo.git_url, workDirectory + '/' + name).then(function(cloned) {
         console.log('cloned repo' + cloned.path())
-        callback()
+        callback(null, repo)
     })
 }
 
