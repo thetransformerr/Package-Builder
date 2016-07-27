@@ -100,7 +100,10 @@ function handleRepo(repo, callback) {
     Git.Clone(repo.git_url, workDirectory + '/' + name).then(function(cloned) {
         console.log('cloned repo' + cloned.path())
         callback(null, repo)
-    })
+    }).catch(function(error) {
+        console.log('Error in cloning ' + error);
+        callback(error, null);
+    });
 }
 
 function getParameters() {
