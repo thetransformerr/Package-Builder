@@ -14,14 +14,14 @@
  * limitations under the License.
  **/
 
-var GitHubApi = require("github");
-var Git = require("nodegit");
-var mkdirp = require("mkdirp");
-var async = require('async');
+const GitHubApi = require("github");
+const Git = require("nodegit");
+const mkdirp = require("mkdirp");
+const async = require('async');
 const readline = require('readline');
 const fs = require('fs');
 
-var github = new GitHubApi({
+const github = new GitHubApi({
     // optional
     debug: true,
     protocol: "https",
@@ -34,9 +34,9 @@ var github = new GitHubApi({
     timeout: 5000
 });
 
-var format = require('date-format');
-var dateString = format.asString('MM_dd_yy', new Date())
-var workDirectory = 'KituraPackagesToUpdate_' + dateString
+const format = require('date-format');
+const dateString = format.asString('MM_dd_yy', new Date())
+const workDirectory = 'KituraPackagesToUpdate_' + dateString
 
 var reposToUpdate = {};
 
