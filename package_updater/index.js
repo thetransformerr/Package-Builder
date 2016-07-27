@@ -97,9 +97,13 @@ reposToUpdateReader.on('close', function() {
 function handleRepo(repo, callback) {
     name = repo.name
     console.log('cloning repo ' + name);
-    Git.Clone(repo.git_url, workDirectory + '/' + name).then(function(cloned) {
-        console.log('cloned repo' + cloned.path())
-        callback(null, repo)
+    Git.Clone(repo.git_url, workDirectory + '/' + name).then(function(clonedRepo) {
+        console.log('cloned repo' + clonedRepo.path())
+
+        Git.Tag.list(clonedRepo).then(function(tags) {
+            console.log('last tag in ' + name + ' is ' + tags);
+            callback(null, repo);
+        });
     }).catch(function(error) {
         console.log('Error in cloning ' + error);
         callback(error, null);
