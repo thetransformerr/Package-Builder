@@ -141,7 +141,8 @@ function getLargestVersion(tags, repoName) {
         }
         return true
     }
-    return tags.filter(isVersionTag, repoName).map(extractMajorMinorTuple).reduce(maximalMajorMinorTuple);
+
+    return tags.filter(isVersionTag).map(extractMajorMinorTuple).reduce(maximalMajorMinorTuple);
 }
 
 function extractMajorMinorTuple(tag) {
