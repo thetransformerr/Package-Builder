@@ -17,10 +17,9 @@
 const parameters = getParameters();
 
 const swiftVersion = parameters.swiftVersion;
-const kituraMajor = parameters.kituraMajor;
-const kituraMinor = parameters.kituraMinor;
+const kituraVersion = parameters.kituraVersion;
 
-console.log('setting Kitura Version to ' + kituraMajor + '.' + kituraMinor);
+console.log('setting Kitura Version to ' + kituraVersion.major + '.' + kituraVersion.minor);
 console.log('setting swift version to ' + swiftVersion);
 
 const GitHubApi = require("github");
@@ -95,14 +94,18 @@ reposToUpdateReader.on('close', function() {
 });
 
 function handleRepo(repo, callback) {
-    name = repo.name
-    console.log('cloning repo ' + name);
-    Git.Clone(repo.git_url, workDirectory + '/' + name).then(function(clonedRepo) {
+    handleRepoByURLAndName(repo.git_url, repo.name, callback);
+}
+
+function handleRepoByURLAndName(repoURL, repoName, callback) {
+    console.log('cloning repo ' + repoName);
+    Git.Clone(repoURL, workDirectory + '/' + repoName).then(function(clonedRepo) {
         console.log('cloned repo' + clonedRepo.path())
 
         Git.Tag.list(clonedRepo).then(function(tags) {
-            console.log('last tag in ' + name + ' is ' + tags);
-            callback(null, repo);
+            const largestVersion = getLargestVersion(tags, repoName);
+            console.log('last tag in ' + repoName + ' is ' + largestVersion.major + '.' + largestVersion.minor);
+            callback(null, clonedRepo);
         });
     }).catch(function(error) {
         console.log('Error in cloning ' + error);
@@ -122,14 +125,34 @@ function getParameters() {
     const kituraVersion = argv[2]
     const swiftVersion = argv[3]
 
-    const kituraVersionComponents = kituraVersion.split('.')
-    if (kituraVersionComponents.length < 2) {
+    if (!/^(\d+)\.(\d+)$/.test(kituraVersion)) {
         console.error('Kitura version parameter should be in the format <major>.<minor>');
         exit();
     }
 
-    const kituraMajor = kituraVersionComponents[0];
-    const kituraMinor = kituraVersionComponents[1];
+    return { swiftVersion: swiftVersion, kituraVersion: extractMajorMinorTuple(kituraVersion) }
+}
 
-    return { swiftVersion: swiftVersion, kituraMajor: kituraMajor, kituraMinor: kituraMinor }
+function getLargestVersion(tags, repoName) {
+    function isVersionTag(tag) {
+        if (!/^(\d+)\.(\d+)\.(\d+)$/.test(tag)) {
+            console.warn('tag of ' + repoName + ' does not match version format: ' + tag);
+            return false
+        }
+        return true
+    }
+    return tags.filter(isVersionTag, repoName).map(extractMajorMinorTuple).reduce(maximalMajorMinorTuple);
+}
+
+function extractMajorMinorTuple(tag) {
+    const versionComponents = tag.split('.');
+    return { major: parseInt(versionComponents[0]), minor: parseInt(versionComponents[1]) }
+}
+
+function maximalMajorMinorTuple(tuple1, tuple2) {
+    if (tuple1.major != tuple2.major) {
+        return tuple1.major > tuple2.major? tuple1: tuple2;
+
+    }
+    return tuple1.minor > tuple2.minor? tuple1: tuple2;
 }
