@@ -28,6 +28,7 @@ const async = require('async');
 const readline = require('readline');
 const fs = require('fs');
 const exec = require('child_process').exec;
+const nullTag = { major: -1, minor: -1}
 
 const github = new GitHubApi({
     // optional
@@ -152,6 +153,10 @@ function getParameters() {
 }
 
 function getLargestVersion(tags, repoName) {
+    if (tags.length == 0) {
+        return nullTag;
+    }
+
     function isVersionTag(tag) {
         if (!/^(\d+)\.(\d+)\.(\d+)$/.test(tag)) {
             console.warn('tag of ' + repoName + ' does not match version format: ' + tag);
