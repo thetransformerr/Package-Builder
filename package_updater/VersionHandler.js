@@ -16,11 +16,11 @@
 
 module.exports = { getLargestVersion: getLargestVersion, extractMajorMinorTuple: extractMajorMinorTuple };
 
-const nullTag = { major: -1, minor: -1}
+const nullVersion = { major: -1, minor: -1}
 
 function getLargestVersion(tags, repoName) {
     if (tags.length == 0) {
-        return nullTag;
+        return nullVersion;
     }
 
     function isVersionTag(tag) {
