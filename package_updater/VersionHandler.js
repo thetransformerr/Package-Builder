@@ -14,8 +14,9 @@
  * limitations under the License.
  **/
 
-module.exports = { getLargestVersion: getLargestVersion, extractMajorMinorTuple: extractMajorMinorTuple };
+module.exports = { getLargestVersion: getLargestVersion, getVersion: getVersion };
 
+// Version is represented by major/minor tuple (without patch)
 const nullVersion = { major: -1, minor: -1}
 
 function getLargestVersion(tags, repoName) {
@@ -31,15 +32,15 @@ function getLargestVersion(tags, repoName) {
         return true
     }
 
-    return tags.filter(isVersionTag).map(extractMajorMinorTuple).reduce(maximalMajorMinorTuple);
+    return tags.filter(isVersionTag).map(getVersion).reduce(maximalVersion);
 }
 
-function extractMajorMinorTuple(tag) {
+function getVersion(tag) {
     const versionComponents = tag.split('.');
     return { major: parseInt(versionComponents[0]), minor: parseInt(versionComponents[1]) }
 }
 
-function maximalMajorMinorTuple(tuple1, tuple2) {
+function maximalVersion(tuple1, tuple2) {
     if (tuple1.major != tuple2.major) {
         return tuple1.major > tuple2.major? tuple1: tuple2;
 

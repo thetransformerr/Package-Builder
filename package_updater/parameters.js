@@ -33,5 +33,5 @@ module.exports = function() {
         exit();
     }
 
-    return { swiftVersion: swiftVersion, kituraVersion: VersionHandler.extractMajorMinorTuple(kituraVersion) }
+    return { swiftVersion: swiftVersion, kituraVersion: VersionHandler.getVersion(kituraVersion) }
 }();
