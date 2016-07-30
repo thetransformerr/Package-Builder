@@ -5,7 +5,7 @@
     "author": "Vadim Eisenberg <vadime@il.ibm.com>",
     "private": true,
     "scripts": {
-        "start": "node index.js"
+        "start": "node main.js"
     },
     "dependencies": {
         "github": "2.2.0",
