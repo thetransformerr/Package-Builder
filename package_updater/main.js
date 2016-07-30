@@ -21,7 +21,7 @@ const kituraVersion = parameters.kituraVersion;
 console.log(`setting Kitura Version to ${kituraVersion.major}.${kituraVersion.minor}`);
 console.log(`setting swift version to ${swiftVersion}`);
 
-const Tags = require( __dirname + '/tags.js');
+const VersionHandler = require( __dirname + '/VersionHandler.js');
 const SPM = require( __dirname + '/SPM.js');
 const getReposToUpdate = require( __dirname + '/getReposToUpdate.js');
 const makeWorkDirectory = require( __dirname + '/makeWorkDirectory.js');
@@ -78,7 +78,7 @@ function handleRepoByURLAndName(repoURL, repoName, workDirectory, callback) {
         console.log(`cloned repo ${clonedRepo.path()}`)
 
         Git.Tag.list(clonedRepo).then(function(tags) {
-            const largestVersion = Tags.getLargestVersion(tags, repoName);
+            const largestVersion = VersionHandler.getLargestVersion(tags, repoName);
             console.log(`last tag in ${repoName} is ${largestVersion.major}.${largestVersion.minor}`);
             SPM.getPackageAsJSON(repoDirectory, function(error, packageJSON) {
                 callback(error, clonedRepo);

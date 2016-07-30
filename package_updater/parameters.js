@@ -16,7 +16,7 @@
 
 
 module.exports = function() {
-    const Tags = require( __dirname + '/tags.js');
+    const VersionHandler = require( __dirname + '/VersionHandler.js');
     const argv = process.argv
     const exit = process.exit
 
@@ -33,5 +33,5 @@ module.exports = function() {
         exit();
     }
 
-    return { swiftVersion: swiftVersion, kituraVersion: Tags.extractMajorMinorTuple(kituraVersion) }
+    return { swiftVersion: swiftVersion, kituraVersion: VersionHandler.extractMajorMinorTuple(kituraVersion) }
 }();
