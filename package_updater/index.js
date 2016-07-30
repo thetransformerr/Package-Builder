@@ -19,8 +19,8 @@ const parameters = getParameters();
 const swiftVersion = parameters.swiftVersion;
 const kituraVersion = parameters.kituraVersion;
 
-console.log('setting Kitura Version to ' + kituraVersion.major + '.' + kituraVersion.minor);
-console.log('setting swift version to ' + swiftVersion);
+console.log(`setting Kitura Version to ${kituraVersion.major}.${kituraVersion.minor}`);
+console.log(`setting swift version to ${swiftVersion}`);
 
 const GitHubApi = require("github");
 const Git = require("nodegit");
@@ -77,7 +77,7 @@ reposToUpdateReader.on('close', function() {
             var name = "";
 
             if(error) {
-                console.error('Error from getting repositories for IBM-Swift: ' + error);
+                console.error(`Error from getting repositories for IBM-Swift: ${error}`);
                 return;
             }
 
@@ -86,10 +86,10 @@ reposToUpdateReader.on('close', function() {
             });
             async.map(reposToHandle, handleRepo, function(error, repos) {
                 if (error) {
-                    console.error('Error in cloning repos' + error);
+                    console.error(`Error in cloning repos ${error}`);
                     return;
                 }
-                console.log('finished cloning ' + repos.length + ' repos')
+                console.log(`finished cloning ${repos.length} repos`);
             });
         });
     });
@@ -100,15 +100,15 @@ function handleRepo(repo, callback) {
 }
 
 function handleRepoByURLAndName(repoURL, repoName, callback) {
-    console.log('cloning repo ' + repoName);
+    console.log(`cloning repo ${repoName}`);
     const repoDirectory = workDirectory + '/' + repoName;
     Git.Clone(repoURL, repoDirectory).then(function(clonedRepo) {
-        console.log('cloned repo' + clonedRepo.path())
+        console.log(`cloned repo ${clonedRepo.path()}`)
 
         Git.Tag.list(clonedRepo).then(function(tags) {
             const largestVersion = getLargestVersion(tags, repoName);
-            const swiftDumpPackageCommand = 'swift package dump-package --input ' + repoDirectory + '/Package.swift';
-            console.log('last tag in ' + repoName + ' is ' + largestVersion.major + '.' + largestVersion.minor);
+            const swiftDumpPackageCommand = `swift package dump-package --input ${repoDirectory}/Package.swift`;
+            console.log(`last tag in ${repoName} is ${largestVersion.major}.${largestVersion.minor}`);
 
             exec(swiftDumpPackageCommand, function (error, stdout, stderr) {
                 var packageJSON = null
@@ -122,12 +122,12 @@ function handleRepoByURLAndName(repoURL, repoName, callback) {
                 }
                 packageJSON = JSON.parse(stdout);
 
-                console.log('package name for ' + repoName + ' is ' + packageJSON.name);
+                console.log(`package name for ${repoName} is ${packageJSON.name}`);
                 callback(null, clonedRepo);
             });
         });
     }).catch(function(error) {
-        console.log('Error in cloning ' + error);
+        console.log(`Error in cloning: ${error}`);
         callback(error, null);
     });
 }
@@ -159,7 +159,7 @@ function getLargestVersion(tags, repoName) {
 
     function isVersionTag(tag) {
         if (!/^(\d+)\.(\d+)\.(\d+)$/.test(tag)) {
-            console.warn('tag of ' + repoName + ' does not match version format: ' + tag);
+            console.warn(`tag of ${repoName} does not match version format: ${tag}`);
             return false
         }
         return true
