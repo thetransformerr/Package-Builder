@@ -14,7 +14,6 @@
  * limitations under the License.
  **/
 
-
 const parameters = require( __dirname + '/parameters.js');
 const swiftVersion = parameters.swiftVersion;
 const kituraVersion = parameters.kituraVersion;
@@ -25,34 +24,21 @@ console.log(`setting swift version to ${swiftVersion}`);
 const Tags = require( __dirname + '/tags.js');
 const SPM = require( __dirname + '/SPM.js');
 const getReposToUpdate = require( __dirname + '/getReposToUpdate.js');
+const makeWorkDirectory = require( __dirname + '/makeWorkDirectory.js');
 const GitHubApi = require("github");
 const Git = require("nodegit");
 const async = require('async');
-const fs = require('fs');
 
 const github = new GitHubApi({
-    // optional
-    debug: false,
     protocol: "https",
-    host: "api.github.com", // should be api.github.com for GitHub
-    headers: {
-        "user-agent": "My-Cool-GitHub-App" // GitHub is happy with a unique user agent
-    },
+    host: "api.github.com",
     Promise: require('bluebird'),
-    followRedirects: false, // default: true; there's currently an issue with non-get redirects, so allow ability to disable follow-redirects
+    followRedirects: false,
     timeout: 5000
 });
 
-const format = require('date-format');
-const dateString = format.asString('MM_dd_yy', new Date())
-const workDirectory = 'KituraPackagesToUpdate_' + dateString
-
 getReposToUpdate(function(reposToUpdate) {
-    fs.mkdir(workDirectory, function(err) {
-        if (err) {
-            console.error(err)
-            return
-        }
+    makeWorkDirectory(function(workDirectory) {
         github.repos.getForOrg({
             org: "IBM-Swift",
             type: "all",
@@ -69,6 +55,11 @@ getReposToUpdate(function(reposToUpdate) {
             const reposToHandle = repos.filter(function(repo) {
                 return reposToUpdate[repo.name];
             });
+
+            function handleRepo(repo, callback) {
+                handleRepoByURLAndName(repo.git_url, repo.name, workDirectory, callback);
+            }
+
             async.map(reposToHandle, handleRepo, function(error, repos) {
                 if (error) {
                     console.error(`Error in cloning repos ${error}`);
@@ -80,11 +71,7 @@ getReposToUpdate(function(reposToUpdate) {
     });
 });
 
-function handleRepo(repo, callback) {
-    handleRepoByURLAndName(repo.git_url, repo.name, callback);
-}
-
-function handleRepoByURLAndName(repoURL, repoName, callback) {
+function handleRepoByURLAndName(repoURL, repoName, workDirectory, callback) {
     console.log(`cloning repo ${repoName}`);
     const repoDirectory = workDirectory + '/' + repoName;
     Git.Clone(repoURL, repoDirectory).then(function(clonedRepo) {
