@@ -60,16 +60,18 @@ getReposToUpdate(function(reposToUpdate) {
                 handleRepoByURLAndName(repo.git_url, repo.name, workDirectory, callback);
             }
 
-            async.map(reposToHandle, handleRepo, function(error, repos) {
-                if (error) {
-                    console.error(`Error in cloning repos ${error}`);
-                    return;
-                }
-                console.log(`finished cloning ${repos.length} repos`);
-            });
+            async.map(reposToHandle, handleRepo, handleRepos);
         });
     });
 });
+
+function handleRepos(error, repos) {
+    if (error) {
+        console.error(`Error in cloning repos ${error}`);
+        return;
+    }
+    console.log(`finished cloning ${repos.length} repos`);
+}
 
 function handleRepoByURLAndName(repoURL, repoName, workDirectory, callback) {
     console.log(`cloning repo ${repoName}`);
@@ -81,7 +83,7 @@ function handleRepoByURLAndName(repoURL, repoName, workDirectory, callback) {
             const largestVersion = VersionHandler.getLargestVersion(tags, repoName);
             console.log(`last tag in ${repoName} is ${VersionHandler.versionAsString(largestVersion)}`);
             SPM.getPackageAsJSON(repoDirectory, function(error, packageJSON) {
-                callback(error, clonedRepo);
+                callback(error, { repo: clonedRepo, largestVersion: largestVersion, packageJSON: packageJSON});
             });
         });
     }).catch(function(error) {
