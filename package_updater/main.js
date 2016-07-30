@@ -15,7 +15,7 @@
  **/
 
 const Tags = require( __dirname + '/tags.js');
-const parameters = getParameters();
+const parameters = require( __dirname + '/parameters.js');
 
 const swiftVersion = parameters.swiftVersion;
 const kituraVersion = parameters.kituraVersion;
@@ -130,24 +130,4 @@ function handleRepoByURLAndName(repoURL, repoName, callback) {
         console.log(`Error in cloning: ${error}`);
         callback(error, null);
     });
-}
-
-function getParameters() {
-    const argv = process.argv
-    const exit = process.exit
-
-    if (argv.length < 4) {
-        console.warn('Format: npm start <major Kitura version to set>.<minor Kitura version to set> <swift version to set>')
-        exit();
-    }
-
-    const kituraVersion = argv[2]
-    const swiftVersion = argv[3]
-
-    if (!/^(\d+)\.(\d+)$/.test(kituraVersion)) {
-        console.error('Kitura version parameter should be in the format <major>.<minor>');
-        exit();
-    }
-
-    return { swiftVersion: swiftVersion, kituraVersion: Tags.extractMajorMinorTuple(kituraVersion) }
 }
