@@ -14,6 +14,7 @@
  * limitations under the License.
  **/
 
+const Tags = require( __dirname + '/tags.js');
 const parameters = getParameters();
 
 const swiftVersion = parameters.swiftVersion;
@@ -28,7 +29,6 @@ const async = require('async');
 const readline = require('readline');
 const fs = require('fs');
 const exec = require('child_process').exec;
-const nullTag = { major: -1, minor: -1}
 
 const github = new GitHubApi({
     // optional
@@ -106,7 +106,7 @@ function handleRepoByURLAndName(repoURL, repoName, callback) {
         console.log(`cloned repo ${clonedRepo.path()}`)
 
         Git.Tag.list(clonedRepo).then(function(tags) {
-            const largestVersion = getLargestVersion(tags, repoName);
+            const largestVersion = Tags.getLargestVersion(tags, repoName);
             const swiftDumpPackageCommand = `swift package dump-package --input ${repoDirectory}/Package.swift`;
             console.log(`last tag in ${repoName} is ${largestVersion.major}.${largestVersion.minor}`);
 
@@ -149,34 +149,5 @@ function getParameters() {
         exit();
     }
 
-    return { swiftVersion: swiftVersion, kituraVersion: extractMajorMinorTuple(kituraVersion) }
-}
-
-function getLargestVersion(tags, repoName) {
-    if (tags.length == 0) {
-        return nullTag;
-    }
-
-    function isVersionTag(tag) {
-        if (!/^(\d+)\.(\d+)\.(\d+)$/.test(tag)) {
-            console.warn(`tag of ${repoName} does not match version format: ${tag}`);
-            return false
-        }
-        return true
-    }
-
-    return tags.filter(isVersionTag).map(extractMajorMinorTuple).reduce(maximalMajorMinorTuple);
-}
-
-function extractMajorMinorTuple(tag) {
-    const versionComponents = tag.split('.');
-    return { major: parseInt(versionComponents[0]), minor: parseInt(versionComponents[1]) }
-}
-
-function maximalMajorMinorTuple(tuple1, tuple2) {
-    if (tuple1.major != tuple2.major) {
-        return tuple1.major > tuple2.major? tuple1: tuple2;
-
-    }
-    return tuple1.minor > tuple2.minor? tuple1: tuple2;
+    return { swiftVersion: swiftVersion, kituraVersion: Tags.extractMajorMinorTuple(kituraVersion) }
 }
