@@ -27,6 +27,7 @@ const Git = require("nodegit");
 const async = require('async');
 const readline = require('readline');
 const fs = require('fs');
+const exec = require('child_process').exec;
 
 const github = new GitHubApi({
     // optional
@@ -99,13 +100,30 @@ function handleRepo(repo, callback) {
 
 function handleRepoByURLAndName(repoURL, repoName, callback) {
     console.log('cloning repo ' + repoName);
-    Git.Clone(repoURL, workDirectory + '/' + repoName).then(function(clonedRepo) {
+    const repoDirectory = workDirectory + '/' + repoName;
+    Git.Clone(repoURL, repoDirectory).then(function(clonedRepo) {
         console.log('cloned repo' + clonedRepo.path())
 
         Git.Tag.list(clonedRepo).then(function(tags) {
             const largestVersion = getLargestVersion(tags, repoName);
+            const swiftDumpPackageCommand = 'swift package dump-package --input ' + repoDirectory + '/Package.swift';
             console.log('last tag in ' + repoName + ' is ' + largestVersion.major + '.' + largestVersion.minor);
-            callback(null, clonedRepo);
+
+            exec(swiftDumpPackageCommand, function (error, stdout, stderr) {
+                var packageJSON = null
+                if (error) {
+                    callback(error, null);
+                    return;
+                }
+
+                if (stderr) {
+                    console.warn(stderr);
+                }
+                packageJSON = JSON.parse(stdout);
+
+                console.log('package name for ' + repoName + ' is ' + packageJSON.name);
+                callback(null, clonedRepo);
+            });
         });
     }).catch(function(error) {
         console.log('Error in cloning ' + error);
