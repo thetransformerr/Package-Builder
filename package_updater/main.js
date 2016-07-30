@@ -14,20 +14,20 @@
  * limitations under the License.
  **/
 
-const Tags = require( __dirname + '/tags.js');
-const parameters = require( __dirname + '/parameters.js');
-const SPM = require( __dirname + '/SPM.js');
 
+const parameters = require( __dirname + '/parameters.js');
 const swiftVersion = parameters.swiftVersion;
 const kituraVersion = parameters.kituraVersion;
 
 console.log(`setting Kitura Version to ${kituraVersion.major}.${kituraVersion.minor}`);
 console.log(`setting swift version to ${swiftVersion}`);
 
+const Tags = require( __dirname + '/tags.js');
+const SPM = require( __dirname + '/SPM.js');
+const getReposToUpdate = require( __dirname + '/getReposToUpdate.js');
 const GitHubApi = require("github");
 const Git = require("nodegit");
 const async = require('async');
-const readline = require('readline');
 const fs = require('fs');
 
 const github = new GitHubApi({
@@ -47,22 +47,7 @@ const format = require('date-format');
 const dateString = format.asString('MM_dd_yy', new Date())
 const workDirectory = 'KituraPackagesToUpdate_' + dateString
 
-var reposToUpdate = {};
-
-const reposToUpdateReader = readline.createInterface({
-    input: fs.createReadStream('repos_to_update.txt')
-});
-
-reposToUpdateReader.on('line', function(line) {
-    line = line.split('#')[0]
-    line = line.trim()
-    if (!line) {
-        return
-    }
-    reposToUpdate[line] = true
-});
-
-reposToUpdateReader.on('close', function() {
+getReposToUpdate(function(reposToUpdate) {
     fs.mkdir(workDirectory, function(err) {
         if (err) {
             console.error(err)
