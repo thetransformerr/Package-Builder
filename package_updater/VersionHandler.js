@@ -14,7 +14,8 @@
  * limitations under the License.
  **/
 
-module.exports = { getLargestVersion: getLargestVersion, getVersion: getVersion };
+module.exports = { getLargestVersion: getLargestVersion, getVersion: getVersion,
+                   versionAsString: versionAsString };
 
 // Version is represented by major/minor tuple (without patch)
 const nullVersion = { major: -1, minor: -1}
@@ -46,4 +47,8 @@ function maximalVersion(tuple1, tuple2) {
 
     }
     return tuple1.minor > tuple2.minor? tuple1: tuple2;
+}
+
+function versionAsString(version) {
+    return `${version.major}.${version.minor}`;
 }

@@ -14,14 +14,14 @@
  * limitations under the License.
  **/
 
+const VersionHandler = require( __dirname + '/VersionHandler.js');
 const parameters = require( __dirname + '/parameters.js');
 const swiftVersion = parameters.swiftVersion;
 const kituraVersion = parameters.kituraVersion;
 
-console.log(`setting Kitura Version to ${kituraVersion.major}.${kituraVersion.minor}`);
+console.log(`setting Kitura Version to ${VersionHandler.versionAsString(kituraVersion)}`);
 console.log(`setting swift version to ${swiftVersion}`);
 
-const VersionHandler = require( __dirname + '/VersionHandler.js');
 const SPM = require( __dirname + '/SPM.js');
 const getReposToUpdate = require( __dirname + '/getReposToUpdate.js');
 const makeWorkDirectory = require( __dirname + '/makeWorkDirectory.js');
@@ -79,7 +79,7 @@ function handleRepoByURLAndName(repoURL, repoName, workDirectory, callback) {
 
         Git.Tag.list(clonedRepo).then(function(tags) {
             const largestVersion = VersionHandler.getLargestVersion(tags, repoName);
-            console.log(`last tag in ${repoName} is ${largestVersion.major}.${largestVersion.minor}`);
+            console.log(`last tag in ${repoName} is ${VersionHandler.versionAsString(largestVersion)}`);
             SPM.getPackageAsJSON(repoDirectory, function(error, packageJSON) {
                 callback(error, clonedRepo);
             });
