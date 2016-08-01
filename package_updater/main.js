@@ -19,7 +19,7 @@ const parameters = require( __dirname + '/parameters.js');
 const swiftVersion = parameters.swiftVersion;
 const kituraVersion = parameters.kituraVersion;
 
-console.log(`setting Kitura Version to ${Version.versionAsString(kituraVersion)}`);
+console.log(`setting Kitura Version to ${Version.asString(kituraVersion)}`);
 console.log(`setting swift version to ${swiftVersion}`);
 
 const SPM = require( __dirname + '/SPM.js');
@@ -88,8 +88,8 @@ function cloneAndPreprocessRepositoryByURLAndName(repositoryURL, repositoryName,
         console.log(`cloned repository ${clonedRepository.path()}`)
 
         Git.Tag.list(clonedRepository).then(function(tags) {
-            const largestVersion = Version.getLargestVersion(tags, repositoryName);
-            console.log(`last tag in ${repositoryName} is ${Version.versionAsString(largestVersion)}`);
+            const largestVersion = Version.getLargest(tags, repositoryName);
+            console.log(`last tag in ${repositoryName} is ${Version.asString(largestVersion)}`);
             SPM.getPackageAsJSON(repositoryDirectory, function(error, packageJSON) {
                 callback(error, { repository: clonedRepository, name: repositoryName,
                                   largestVersion: largestVersion, packageJSON: packageJSON});

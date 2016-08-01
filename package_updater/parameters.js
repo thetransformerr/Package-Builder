@@ -33,5 +33,5 @@ module.exports = function() {
         exit();
     }
 
-    return { swiftVersion: swiftVersion, kituraVersion: Version.getVersion(kituraVersion) }
+    return { swiftVersion: swiftVersion, kituraVersion: Version.getFromTag(kituraVersion) }
 }();
