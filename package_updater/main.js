@@ -37,13 +37,13 @@ const github = new GitHubApi({
     timeout: 5000
 });
 
-getReposToUpdate(function(reposToUpdate) {
+getReposToUpdate(function(repositoriesToUpdate) {
     makeWorkDirectory(function(workDirectory) {
         github.repos.getForOrg({
             org: "IBM-Swift",
             type: "all",
             per_page: 300
-        }, function(error, repos) {
+        }, function(error, repositories) {
             var i = 0;
             var name = "";
 
@@ -52,38 +52,47 @@ getReposToUpdate(function(reposToUpdate) {
                 return;
             }
 
-            const reposToHandle = repos.filter(function(repo) {
-                return reposToUpdate[repo.name];
+            const repositoriesToHandle = repositories.filter(function(repository) {
+                return repositoriesToUpdate[repository.name];
             });
 
-            function handleRepo(repo, callback) {
-                handleRepoByURLAndName(repo.git_url, repo.name, workDirectory, callback);
+            function cloneAndPreprocessRepository(repository, callback) {
+                cloneAndPreprocessRepositoryByURLAndName(repository.git_url, repository.name, workDirectory, callback);
             }
 
-            async.map(reposToHandle, handleRepo, handleRepos);
+            async.map(repositoriesToHandle, cloneAndPreprocessRepository, processClonedRepositories);
         });
     });
 });
 
-function handleRepos(error, repos) {
+function processClonedRepositories(error, repositories) {
     if (error) {
-        console.error(`Error in cloning repos ${error}`);
+        console.error(`Error in cloning repositories ${error}`);
         return;
     }
-    console.log(`finished cloning ${repos.length} repos`);
+    console.log(`finished cloning ${repositories.length} repositories`);
 }
 
-function handleRepoByURLAndName(repoURL, repoName, workDirectory, callback) {
-    console.log(`cloning repo ${repoName}`);
-    const repoDirectory = workDirectory + '/' + repoName;
-    Git.Clone(repoURL, repoDirectory).then(function(clonedRepo) {
-        console.log(`cloned repo ${clonedRepo.path()}`)
+function isKituraCoreRepository(repository) {
+    return repository.name.startsWith('Kitura');
+}
 
-        Git.Tag.list(clonedRepo).then(function(tags) {
-            const largestVersion = VersionHandler.getLargestVersion(tags, repoName);
-            console.log(`last tag in ${repoName} is ${VersionHandler.versionAsString(largestVersion)}`);
-            SPM.getPackageAsJSON(repoDirectory, function(error, packageJSON) {
-                callback(error, { repo: clonedRepo, largestVersion: largestVersion, packageJSON: packageJSON});
+function wasRepositoryChangedAfterTag(clonedRepository, tag) {
+
+}
+
+function cloneAndPreprocessRepositoryByURLAndName(repositoryURL, repositoryName, workDirectory, callback) {
+    console.log(`cloning repository ${repositoryName}`);
+    const repositoryDirectory = workDirectory + '/' + repositoryName;
+    Git.Clone(repositoryURL, repositoryDirectory).then(function(clonedRepository) {
+        console.log(`cloned repository ${clonedRepository.path()}`)
+
+        Git.Tag.list(clonedRepository).then(function(tags) {
+            const largestVersion = VersionHandler.getLargestVersion(tags, repositoryName);
+            console.log(`last tag in ${repositoryName} is ${VersionHandler.versionAsString(largestVersion)}`);
+            SPM.getPackageAsJSON(repositoryDirectory, function(error, packageJSON) {
+                callback(error, { repository: clonedRepository, name: repositoryName,
+                                  largestVersion: largestVersion, packageJSON: packageJSON});
             });
         });
     }).catch(function(error) {
