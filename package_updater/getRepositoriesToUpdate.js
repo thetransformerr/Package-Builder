@@ -18,22 +18,22 @@ const Readline = require('readline');
 const FS = require('fs');
 
 module.exports = function(callback) {
-    var reposToUpdate = {};
+    var repositoriesToUpdate = {};
 
-    const reposToUpdateReader = Readline.createInterface({
+    const repositoriesToUpdateReader = Readline.createInterface({
         input: FS.createReadStream('repos_to_update.txt')
     });
 
-    reposToUpdateReader.on('line', function(line) {
+    repositoriesToUpdateReader.on('line', function(line) {
         line = line.split('#')[0]
         line = line.trim()
         if (!line) {
             return
         }
-        reposToUpdate[line] = true
+        repositoriesToUpdate[line] = true
     });
 
-    reposToUpdateReader.on('close', function() {
-        callback(reposToUpdate);
+    repositoriesToUpdateReader.on('close', function() {
+        callback(repositoriesToUpdate);
     });
 }
