@@ -14,12 +14,12 @@
  * limitations under the License.
  **/
 
-const VersionHandler = require( __dirname + '/VersionHandler.js');
+const Version = require( __dirname + '/Version.js');
 const parameters = require( __dirname + '/parameters.js');
 const swiftVersion = parameters.swiftVersion;
 const kituraVersion = parameters.kituraVersion;
 
-console.log(`setting Kitura Version to ${VersionHandler.versionAsString(kituraVersion)}`);
+console.log(`setting Kitura Version to ${Version.versionAsString(kituraVersion)}`);
 console.log(`setting swift version to ${swiftVersion}`);
 
 const SPM = require( __dirname + '/SPM.js');
@@ -27,7 +27,7 @@ const getReposToUpdate = require( __dirname + '/getReposToUpdate.js');
 const makeWorkDirectory = require( __dirname + '/makeWorkDirectory.js');
 const GitHubApi = require("github");
 const Git = require("nodegit");
-const async = require('async');
+const Async = require('async');
 
 const github = new GitHubApi({
     protocol: "https",
@@ -60,7 +60,7 @@ getReposToUpdate(function(repositoriesToUpdate) {
                 cloneAndPreprocessRepositoryByURLAndName(repository.git_url, repository.name, workDirectory, callback);
             }
 
-            async.map(repositoriesToHandle, cloneAndPreprocessRepository, processClonedRepositories);
+            Async.map(repositoriesToHandle, cloneAndPreprocessRepository, processClonedRepositories);
         });
     });
 });
@@ -88,8 +88,8 @@ function cloneAndPreprocessRepositoryByURLAndName(repositoryURL, repositoryName,
         console.log(`cloned repository ${clonedRepository.path()}`)
 
         Git.Tag.list(clonedRepository).then(function(tags) {
-            const largestVersion = VersionHandler.getLargestVersion(tags, repositoryName);
-            console.log(`last tag in ${repositoryName} is ${VersionHandler.versionAsString(largestVersion)}`);
+            const largestVersion = Version.getLargestVersion(tags, repositoryName);
+            console.log(`last tag in ${repositoryName} is ${Version.versionAsString(largestVersion)}`);
             SPM.getPackageAsJSON(repositoryDirectory, function(error, packageJSON) {
                 callback(error, { repository: clonedRepository, name: repositoryName,
                                   largestVersion: largestVersion, packageJSON: packageJSON});
