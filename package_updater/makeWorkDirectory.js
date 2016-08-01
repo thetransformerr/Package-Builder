@@ -14,14 +14,14 @@
  * limitations under the License.
  **/
 
-const format = require('date-format');
-const fs = require('fs');
+const Format = require('date-format');
+const FS = require('fs');
 
 module.exports = function(callback) {
-    const dateString = format.asString('MM_dd_yy', new Date())
+    const dateString = Format.asString('MM_dd_yy', new Date())
     const workDirectory = 'KituraPackagesToUpdate_' + dateString
 
-    fs.mkdir(workDirectory, function(err) {
+    FS.mkdir(workDirectory, function(err) {
         if (err) {
             console.error(err);
             process.exit();

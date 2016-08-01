@@ -14,14 +14,14 @@
  * limitations under the License.
  **/
 
-const readline = require('readline');
-const fs = require('fs');
+const Readline = require('readline');
+const FS = require('fs');
 
 module.exports = function(callback) {
     var reposToUpdate = {};
 
-    const reposToUpdateReader = readline.createInterface({
-        input: fs.createReadStream('repos_to_update.txt')
+    const reposToUpdateReader = Readline.createInterface({
+        input: FS.createReadStream('repos_to_update.txt')
     });
 
     reposToUpdateReader.on('line', function(line) {
