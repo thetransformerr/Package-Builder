@@ -12,7 +12,8 @@
         "bluebird": "3.4.1",
         "nodegit": "0.14.1",
         "date-format": "0.0.2",
-        "async": "2.0.1"
+        "async": "2.0.1",
+        "untildify": "3.0.2"
     },
     "license": "Apache v2.0"
 }

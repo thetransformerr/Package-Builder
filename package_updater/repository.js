@@ -17,6 +17,7 @@
 const readline = require('readline');
 const fs = require('fs');
 const GitHubApi = require("github");
+const untildify = require('untildify');
 
 module.exports = { getRepositoriesToUpdate: getRepositoriesToUpdate,
                    getIBMSwiftRepositories: getIBMSwiftRepositories }
@@ -51,9 +52,17 @@ function getIBMSwiftRepositories(callback) {
         timeout: 5000
     });
 
-    github.repos.getForOrg({
-        org: "IBM-Swift",
-        type: "all",
-        per_page: 300
-    }, callback);
+    fs.readFile(untildify('~/.ssh/package_updater_github_token.txt'), 'utf8', function (error, token) {
+        if (error) {
+            callback(error, null);
+        }
+
+        github.authenticate({ type: "oauth", token: token.trim() });
+
+        github.repos.getForOrg({
+            org: "IBM-Swift",
+            type: "all",
+            per_page: 300
+        }, callback);
+    });
 }
