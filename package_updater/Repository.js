@@ -17,7 +17,9 @@
 const Readline = require('readline');
 const FS = require('fs');
 
-module.exports = function(callback) {
+module.exports = { getRepositoriesToUpdate: getRepositoriesToUpdate }
+
+function getRepositoriesToUpdate(callback) {
     var repositoriesToUpdate = {};
 
     const repositoriesToUpdateReader = Readline.createInterface({

@@ -23,7 +23,7 @@ console.log(`setting Kitura Version to ${Version.asString(kituraVersion)}`);
 console.log(`setting swift version to ${swiftVersion}`);
 
 const SPM = require( __dirname + '/SPM.js');
-const getRepositoriesToUpdate = require( __dirname + '/getRepositoriesToUpdate.js');
+const Repository = require( __dirname + '/Repository.js');
 const makeWorkDirectory = require( __dirname + '/makeWorkDirectory.js');
 const GitHubApi = require("github");
 const Git = require("nodegit");
@@ -37,7 +37,7 @@ const github = new GitHubApi({
     timeout: 5000
 });
 
-getRepositoriesToUpdate(function(repositoriesToUpdate) {
+Repository.getRepositoriesToUpdate(function(repositoriesToUpdate) {
     makeWorkDirectory(function(workDirectory) {
         github.repos.getForOrg({
             org: "IBM-Swift",
