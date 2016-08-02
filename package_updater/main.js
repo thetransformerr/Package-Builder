@@ -28,22 +28,23 @@ const makeWorkDirectory = require( __dirname + '/makeWorkDirectory.js');
 const Git = require("nodegit");
 const Async = require('async');
 
-Repository.getRepositoriesToUpdate(function(error, repositoriesToUpdate) {
-    makeWorkDirectory(function(error, workDirectory) {
-        Repository.getIBMSwiftRepositories(function(error, repositories) {
-            updateRepositories(error, repositoriesToUpdate, repositories, workDirectory);
-        });
-    });
-});
+Async.series({
+    repositoriesToUpdate: Repository.getRepositoriesToUpdate,
+    workDirectory: makeWorkDirectory,
+    IBMSwiftRepositories: Repository.getIBMSwiftRepositories
+}, updateRepositories);
 
-function updateRepositories(error, repositoriesToUpdate, IBMSwiftRepositories, workDirectory) {
-    var i = 0;
-    var name = "";
-
+function updateRepositories(error, results) {
     if(error) {
-        console.error(`Error from getting repositories for IBM-Swift: ${error}`);
+        console.error(error);
         return;
     }
+
+    const repositoriesToUpdate = results.repositoriesToUpdate;
+    const IBMSwiftRepositories = results.IBMSwiftRepositories;
+    const workDirectory = results.workDirectory;
+    var i = 0;
+    var name = "";
 
     const repositoriesToHandle = IBMSwiftRepositories.filter(function(repository) {
         return repositoriesToUpdate[repository.name];
