@@ -14,23 +14,23 @@
  * limitations under the License.
  **/
 
-const version = require( __dirname + '/version.js');
+const versionHandler = require( __dirname + '/versionHandler.js');
 const parameters = require( __dirname + '/parameters.js');
 const swiftVersion = parameters.swiftVersion;
 const kituraVersion = parameters.kituraVersion;
 
-console.log(`setting Kitura Version to ${version.asString(kituraVersion)}`);
+console.log(`setting Kitura Version to ${versionHandler.asString(kituraVersion)}`);
 console.log(`setting swift version to ${swiftVersion}`);
 
-const spm = require( __dirname + '/spm.js');
-const repository = require( __dirname + '/repository.js');
+const spmHandler = require( __dirname + '/spmHandler.js');
+const repositoryHandler = require( __dirname + '/repositoryHandler.js');
 const makeWorkDirectory = require( __dirname + '/makeWorkDirectory.js');
 const git = require("nodegit");
 const async = require('async');
 
 async.parallel({
     workDirectory: makeWorkDirectory,
-    repositoriesToHandle: repository.getRepositoriesToHandle
+    repositoriesToHandle: repositoryHandler.getRepositoriesToHandle
 }, updateRepositories);
 
 function updateRepositories(error, results) {
@@ -70,9 +70,9 @@ function cloneAndPreprocessRepositoryByURLAndName(repositoryURL, repositoryName,
         console.log(`cloned repository ${clonedRepository.path()}`)
 
         git.Tag.list(clonedRepository).then(function(tags) {
-            const largestVersion = version.getLargest(tags, repositoryName);
-            console.log(`last tag in ${repositoryName} is ${version.asString(largestVersion)}`);
-            spm.getPackageAsJSON(repositoryDirectory, function(error, packageJSON) {
+            const largestVersion = versionHandler.getLargest(tags, repositoryName);
+            console.log(`last tag in ${repositoryName} is ${versionHandler.asString(largestVersion)}`);
+            spmHandler.getPackageAsJSON(repositoryDirectory, function(error, packageJSON) {
                 callback(error, { repository: clonedRepository, name: repositoryName,
                                   largestVersion: largestVersion, packageJSON: packageJSON});
             });

@@ -16,7 +16,7 @@
 
 
 module.exports = function() {
-    const version = require( __dirname + '/version.js');
+    const versionHandler = require( __dirname + '/versionHandler.js');
     const argv = process.argv
     const exit = process.exit
 
@@ -33,5 +33,5 @@ module.exports = function() {
         exit();
     }
 
-    return { swiftVersion: swiftVersion, kituraVersion: version.getFromTag(kituraVersion) }
+    return { swiftVersion: swiftVersion, kituraVersion: versionHandler.getFromTag(kituraVersion) }
 }();
