@@ -14,8 +14,8 @@
  * limitations under the License.
  **/
 
-const Readline = require('readline');
-const FS = require('fs');
+const readline = require('readline');
+const fs = require('fs');
 const GitHubApi = require("github");
 
 module.exports = { getRepositoriesToUpdate: getRepositoriesToUpdate,
@@ -24,8 +24,8 @@ module.exports = { getRepositoriesToUpdate: getRepositoriesToUpdate,
 function getRepositoriesToUpdate(callback) {
     var repositoriesToUpdate = {};
 
-    const repositoriesToUpdateReader = Readline.createInterface({
-        input: FS.createReadStream('repos_to_update.txt')
+    const repositoriesToUpdateReader = readline.createInterface({
+        input: fs.createReadStream('repos_to_update.txt')
     });
 
     repositoriesToUpdateReader.on('line', function(line) {

@@ -14,24 +14,24 @@
  * limitations under the License.
  **/
 
-const Version = require( __dirname + '/Version.js');
+const version = require( __dirname + '/version.js');
 const parameters = require( __dirname + '/parameters.js');
 const swiftVersion = parameters.swiftVersion;
 const kituraVersion = parameters.kituraVersion;
 
-console.log(`setting Kitura Version to ${Version.asString(kituraVersion)}`);
+console.log(`setting Kitura Version to ${version.asString(kituraVersion)}`);
 console.log(`setting swift version to ${swiftVersion}`);
 
-const SPM = require( __dirname + '/SPM.js');
-const Repository = require( __dirname + '/Repository.js');
+const spm = require( __dirname + '/spm.js');
+const repository = require( __dirname + '/repository.js');
 const makeWorkDirectory = require( __dirname + '/makeWorkDirectory.js');
-const Git = require("nodegit");
-const Async = require('async');
+const git = require("nodegit");
+const async = require('async');
 
-Async.series({
-    repositoriesToUpdate: Repository.getRepositoriesToUpdate,
+async.series({
+    repositoriesToUpdate: repository.getRepositoriesToUpdate,
     workDirectory: makeWorkDirectory,
-    IBMSwiftRepositories: Repository.getIBMSwiftRepositories
+    ibmSwiftRepositories: repository.getIBMSwiftRepositories
 }, updateRepositories);
 
 function updateRepositories(error, results) {
@@ -41,12 +41,12 @@ function updateRepositories(error, results) {
     }
 
     const repositoriesToUpdate = results.repositoriesToUpdate;
-    const IBMSwiftRepositories = results.IBMSwiftRepositories;
+    const ibmSwiftRepositories = results.ibmSwiftRepositories;
     const workDirectory = results.workDirectory;
     var i = 0;
     var name = "";
 
-    const repositoriesToHandle = IBMSwiftRepositories.filter(function(repository) {
+    const repositoriesToHandle = ibmSwiftRepositories.filter(function(repository) {
         return repositoriesToUpdate[repository.name];
     });
 
@@ -54,7 +54,7 @@ function updateRepositories(error, results) {
         cloneAndPreprocessRepositoryByURLAndName(repository.git_url, repository.name, workDirectory, callback);
     }
 
-    Async.map(repositoriesToHandle, cloneAndPreprocessRepository, processClonedRepositories);
+    async.map(repositoriesToHandle, cloneAndPreprocessRepository, processClonedRepositories);
 }
 
 function processClonedRepositories(error, repositories) {
@@ -76,13 +76,13 @@ function wasRepositoryChangedAfterTag(clonedRepository, tag) {
 function cloneAndPreprocessRepositoryByURLAndName(repositoryURL, repositoryName, workDirectory, callback) {
     console.log(`cloning repository ${repositoryName}`);
     const repositoryDirectory = workDirectory + '/' + repositoryName;
-    Git.Clone(repositoryURL, repositoryDirectory).then(function(clonedRepository) {
+    git.Clone(repositoryURL, repositoryDirectory).then(function(clonedRepository) {
         console.log(`cloned repository ${clonedRepository.path()}`)
 
-        Git.Tag.list(clonedRepository).then(function(tags) {
-            const largestVersion = Version.getLargest(tags, repositoryName);
-            console.log(`last tag in ${repositoryName} is ${Version.asString(largestVersion)}`);
-            SPM.getPackageAsJSON(repositoryDirectory, function(error, packageJSON) {
+        git.Tag.list(clonedRepository).then(function(tags) {
+            const largestVersion = version.getLargest(tags, repositoryName);
+            console.log(`last tag in ${repositoryName} is ${version.asString(largestVersion)}`);
+            spm.getPackageAsJSON(repositoryDirectory, function(error, packageJSON) {
                 callback(error, { repository: clonedRepository, name: repositoryName,
                                   largestVersion: largestVersion, packageJSON: packageJSON});
             });
