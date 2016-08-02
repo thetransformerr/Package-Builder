@@ -31,26 +31,30 @@ const Async = require('async');
 Repository.getRepositoriesToUpdate(function(repositoriesToUpdate) {
     makeWorkDirectory(function(workDirectory) {
         Repository.getIBMSwiftRepositories(function(error, repositories) {
-            var i = 0;
-            var name = "";
-
-            if(error) {
-                console.error(`Error from getting repositories for IBM-Swift: ${error}`);
-                return;
-            }
-
-            const repositoriesToHandle = repositories.filter(function(repository) {
-                return repositoriesToUpdate[repository.name];
-            });
-
-            function cloneAndPreprocessRepository(repository, callback) {
-                cloneAndPreprocessRepositoryByURLAndName(repository.git_url, repository.name, workDirectory, callback);
-            }
-
-            Async.map(repositoriesToHandle, cloneAndPreprocessRepository, processClonedRepositories);
+            updateRepositories(error, repositoriesToUpdate, repositories, workDirectory);
         });
     });
 });
+
+function updateRepositories(error, repositoriesToUpdate, IBMSwiftRepositories, workDirectory) {
+    var i = 0;
+    var name = "";
+
+    if(error) {
+        console.error(`Error from getting repositories for IBM-Swift: ${error}`);
+        return;
+    }
+
+    const repositoriesToHandle = IBMSwiftRepositories.filter(function(repository) {
+        return repositoriesToUpdate[repository.name];
+    });
+
+    function cloneAndPreprocessRepository(repository, callback) {
+        cloneAndPreprocessRepositoryByURLAndName(repository.git_url, repository.name, workDirectory, callback);
+    }
+
+    Async.map(repositoriesToHandle, cloneAndPreprocessRepository, processClonedRepositories);
+}
 
 function processClonedRepositories(error, repositories) {
     if (error) {
