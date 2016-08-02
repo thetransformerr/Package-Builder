@@ -23,7 +23,7 @@ const async = require('async');
 module.exports = { getRepositoriesToHandle: getRepositoriesToHandle }
 
 function getRepositoriesToHandle(callback) {
-    async.series({
+    async.parallel({
         repositoriesToUpdate: getRepositoriesToUpdate,
         ibmSwiftRepositories: getIBMSwiftRepositories
     }, function(error, result) {

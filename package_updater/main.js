@@ -28,7 +28,7 @@ const makeWorkDirectory = require( __dirname + '/makeWorkDirectory.js');
 const git = require("nodegit");
 const async = require('async');
 
-async.series({
+async.parallel({
     workDirectory: makeWorkDirectory,
     repositoriesToHandle: repository.getRepositoriesToHandle
 }, updateRepositories);
