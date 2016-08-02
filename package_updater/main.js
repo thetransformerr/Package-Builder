@@ -25,25 +25,12 @@ console.log(`setting swift version to ${swiftVersion}`);
 const SPM = require( __dirname + '/SPM.js');
 const Repository = require( __dirname + '/Repository.js');
 const makeWorkDirectory = require( __dirname + '/makeWorkDirectory.js');
-const GitHubApi = require("github");
 const Git = require("nodegit");
 const Async = require('async');
 
-const github = new GitHubApi({
-    protocol: "https",
-    host: "api.github.com",
-    Promise: require('bluebird'),
-    followRedirects: false,
-    timeout: 5000
-});
-
 Repository.getRepositoriesToUpdate(function(repositoriesToUpdate) {
     makeWorkDirectory(function(workDirectory) {
-        github.repos.getForOrg({
-            org: "IBM-Swift",
-            type: "all",
-            per_page: 300
-        }, function(error, repositories) {
+        Repository.getIBMSwiftRepositories(function(error, repositories) {
             var i = 0;
             var name = "";
 

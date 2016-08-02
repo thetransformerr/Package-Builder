@@ -16,8 +16,10 @@
 
 const Readline = require('readline');
 const FS = require('fs');
+const GitHubApi = require("github");
 
-module.exports = { getRepositoriesToUpdate: getRepositoriesToUpdate }
+module.exports = { getRepositoriesToUpdate: getRepositoriesToUpdate,
+                   getIBMSwiftRepositories: getIBMSwiftRepositories }
 
 function getRepositoriesToUpdate(callback) {
     var repositoriesToUpdate = {};
@@ -38,4 +40,20 @@ function getRepositoriesToUpdate(callback) {
     repositoriesToUpdateReader.on('close', function() {
         callback(repositoriesToUpdate);
     });
+}
+
+function getIBMSwiftRepositories(callback) {
+    const github = new GitHubApi({
+        protocol: "https",
+        host: "api.github.com",
+        Promise: require('bluebird'),
+        followRedirects: false,
+        timeout: 5000
+    });
+
+    github.repos.getForOrg({
+        org: "IBM-Swift",
+        type: "all",
+        per_page: 300
+    }, callback);
 }
