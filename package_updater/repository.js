@@ -18,9 +18,25 @@ const readline = require('readline');
 const fs = require('fs');
 const GitHubApi = require("github");
 const untildify = require('untildify');
+const async = require('async');
 
-module.exports = { getRepositoriesToUpdate: getRepositoriesToUpdate,
-                   getIBMSwiftRepositories: getIBMSwiftRepositories }
+module.exports = { getRepositoriesToHandle: getRepositoriesToHandle }
+
+function getRepositoriesToHandle(callback) {
+    async.series({
+        repositoriesToUpdate: getRepositoriesToUpdate,
+        ibmSwiftRepositories: getIBMSwiftRepositories
+    }, function(error, result) {
+        if (error) {
+            return callback(error);
+        }
+        const repositoriesToHandle = result.ibmSwiftRepositories.filter(function(repository) {
+            return result.repositoriesToUpdate[repository.name];
+        });
+
+        callback(null, repositoriesToHandle);
+    });
+}
 
 function getRepositoriesToUpdate(callback) {
     var repositoriesToUpdate = {};

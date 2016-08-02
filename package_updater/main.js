@@ -29,9 +29,8 @@ const git = require("nodegit");
 const async = require('async');
 
 async.series({
-    repositoriesToUpdate: repository.getRepositoriesToUpdate,
-    workDirectory: makeWorkDirectory,
-    ibmSwiftRepositories: repository.getIBMSwiftRepositories
+    repositoriesToHandle: repository.getRepositoriesToHandle,
+    workDirectory: makeWorkDirectory
 }, updateRepositories);
 
 function updateRepositories(error, results) {
@@ -40,21 +39,12 @@ function updateRepositories(error, results) {
         return;
     }
 
-    const repositoriesToUpdate = results.repositoriesToUpdate;
-    const ibmSwiftRepositories = results.ibmSwiftRepositories;
-    const workDirectory = results.workDirectory;
-    var i = 0;
-    var name = "";
-
-    const repositoriesToHandle = ibmSwiftRepositories.filter(function(repository) {
-        return repositoriesToUpdate[repository.name];
-    });
-
     function cloneAndPreprocessRepository(repository, callback) {
-        cloneAndPreprocessRepositoryByURLAndName(repository.git_url, repository.name, workDirectory, callback);
+        cloneAndPreprocessRepositoryByURLAndName(repository.git_url, repository.name,
+                                                 results.workDirectory, callback);
     }
 
-    async.map(repositoriesToHandle, cloneAndPreprocessRepository, processClonedRepositories);
+    async.map(results.repositoriesToHandle, cloneAndPreprocessRepository, processClonedRepositories);
 }
 
 function processClonedRepositories(error, repositories) {
