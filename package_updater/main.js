@@ -29,8 +29,8 @@ const git = require("nodegit");
 const async = require('async');
 
 async.series({
-    repositoriesToHandle: repository.getRepositoriesToHandle,
-    workDirectory: makeWorkDirectory
+    workDirectory: makeWorkDirectory,
+    repositoriesToHandle: repository.getRepositoriesToHandle
 }, updateRepositories);
 
 function updateRepositories(error, results) {
