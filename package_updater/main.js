@@ -28,8 +28,8 @@ const makeWorkDirectory = require( __dirname + '/makeWorkDirectory.js');
 const Git = require("nodegit");
 const Async = require('async');
 
-Repository.getRepositoriesToUpdate(function(repositoriesToUpdate) {
-    makeWorkDirectory(function(workDirectory) {
+Repository.getRepositoriesToUpdate(function(error, repositoriesToUpdate) {
+    makeWorkDirectory(function(error, workDirectory) {
         Repository.getIBMSwiftRepositories(function(error, repositories) {
             updateRepositories(error, repositoriesToUpdate, repositories, workDirectory);
         });

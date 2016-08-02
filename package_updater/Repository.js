@@ -38,7 +38,7 @@ function getRepositoriesToUpdate(callback) {
     });
 
     repositoriesToUpdateReader.on('close', function() {
-        callback(repositoriesToUpdate);
+        callback(null, repositoriesToUpdate);
     });
 }
 
