@@ -14,13 +14,16 @@
  * limitations under the License.
  **/
 
+module.exports = { getRepositoriesToHandle: getRepositoriesToHandle, clone: clone }
+
 const readline = require('readline');
 const fs = require('fs');
 const GitHubApi = require("github");
+const git = require("nodegit");
 const untildify = require('untildify');
 const async = require('async');
-
-module.exports = { getRepositoriesToHandle: getRepositoriesToHandle }
+const versionHandler = require( __dirname + '/versionHandler.js');
+const spmHandler = require( __dirname + '/spmHandler.js');
 
 function getRepositoriesToHandle(callback) {
     async.parallel({
@@ -81,4 +84,51 @@ function getIBMSwiftRepositories(callback) {
             per_page: 300
         }, callback);
     });
+}
+
+function clone(repositories, workDirectory, callback) {
+    function cloneRepository(repository, callback) {
+        cloneRepositoryByURLAndName(repository.git_url, repository.name, workDirectory,
+                                    function(error, clonedRepository) {
+                                        if (error) {
+                                            return callback(error, null);
+                                        }
+                                        getRepositoryInfo(clonedRepository, repository.name, workDirectory,
+                                                          callback);
+                                    });
+    }
+    async.map(repositories, cloneRepository, callback);
+}
+
+function cloneRepositoryByURLAndName(repositoryURL, repositoryName, workDirectory, callback) {
+    console.log(`cloning repository ${repositoryName}`);
+    const repositoryDirectory = workDirectory + '/' + repositoryName;
+    git.Clone(repositoryURL, repositoryDirectory).then(function(clonedRepository) {
+        console.log(`cloned repository ${clonedRepository.path()}`)
+        callback(null, clonedRepository);
+    }).catch(function(error) {
+        console.log(`Error in cloning: ${error}`);
+        callback(error, null);
+    });
+}
+
+function getRepositoryInfo(clonedRepository, repositoryName, workDirectory, callback) {
+    const repositoryDirectory = workDirectory + '/' + repositoryName;
+
+    git.Tag.list(clonedRepository).then(function(tags) {
+        const largestVersion = versionHandler.getLargest(tags, repositoryName);
+        console.log(`last tag in ${repositoryName} is ${versionHandler.asString(largestVersion)}`);
+        spmHandler.getPackageAsJSON(repositoryDirectory, function(error, packageJSON) {
+            callback(error, { repository: clonedRepository, name: repositoryName,
+                              largestVersion: largestVersion, packageJSON: packageJSON});
+        });
+    });
+}
+
+function isKituraCoreRepository(repository) {
+    return repository.name.startsWith('Kitura');
+}
+
+function wasRepositoryChangedAfterTag(clonedRepository, tag) {
+
 }
