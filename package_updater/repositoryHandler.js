@@ -19,7 +19,7 @@ module.exports = { getRepositoriesToHandle: getRepositoriesToHandle, clone: clon
 
 const readline = require('readline');
 const fs = require('fs');
-const GitHubApi = require("github");
+const GithubAPI = require("github");
 const git = require("nodegit");
 const untildify = require('untildify');
 const async = require('async');
@@ -64,7 +64,7 @@ function getRepositoriesToUpdate(callback) {
 }
 
 function getIBMSwiftRepositories(callback) {
-    const github = new GitHubApi({
+    const github = new GithubAPI({
         protocol: "https",
         host: "api.github.com",
         Promise: require('bluebird'),
