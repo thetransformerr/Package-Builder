@@ -14,7 +14,8 @@
  * limitations under the License.
  **/
 
-module.exports = { getRepositoriesToHandle: getRepositoriesToHandle, clone: clone }
+module.exports = { getRepositoriesToHandle: getRepositoriesToHandle, clone: clone,
+                   calculateNewVersions: calculateNewVersions };
 
 const readline = require('readline');
 const fs = require('fs');
@@ -129,6 +130,22 @@ function isKituraCoreRepository(repository) {
     return repository.name.startsWith('Kitura');
 }
 
-function wasRepositoryChangedAfterTag(clonedRepository, tag) {
+function calculateNewVersions(kituraVersion, decoratedRepositories, callback) {
+    console.log(`got ${decoratedRepositories.length} repositories, ${versionHandler.asString(kituraVersion)}`);
 
+    async.filter(decoratedRepositories, function(decoratedRepository, filterCallback) {
+        wasRepositoryChangedAfterVersion(decoratedRepository.largestVersion,
+                                         decoratedRepository.repository,
+                                         filterCallback);
+    }, function(error, changedRepositories) {
+        console.log(`${changedRepositories.length} repositories were changed`);
+        callback(null);
+    });
+}
+
+function wasRepositoryChangedAfterVersion(version, repository, callback) {
+    const versionString = versionHandler.asString(version);
+
+    console.log(`checking if ${repository.workdir()} was changed after ${versionString}`);
+    callback(null, true);
 }

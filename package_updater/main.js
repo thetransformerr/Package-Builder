@@ -31,9 +31,12 @@ function setup(callback) {
     }, (error, results) =>  callback(error, results.repositoriesToHandle, results.workDirectory));
 }
 
-async.waterfall([setup, repositoryHandler.clone], function(error, result) {
-    if (error) {
-        console.error(`Error in updating repositories ${error}`);
-    }
-    console.log(`finished cloning ${result.length} repositories`);
-});
+async.waterfall([setup,
+                 repositoryHandler.clone,
+                 async.apply(repositoryHandler.calculateNewVersions, kituraVersion)],
+                 function(error, result) {
+                    if (error) {
+                        return console.error(`Error in updating repositories ${error}`);
+                    }
+                    console.log('Finished');
+                 });
