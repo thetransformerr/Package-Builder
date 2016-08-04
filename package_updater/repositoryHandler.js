@@ -105,7 +105,7 @@ function cloneRepositoryByURLAndName(repositoryURL, repositoryName, workDirector
     console.log(`cloning repository ${repositoryName}`);
     const repositoryDirectory = workDirectory + '/' + repositoryName;
     git.Clone(repositoryURL, repositoryDirectory).then(function(clonedRepository) {
-        console.log(`cloned repository ${clonedRepository.path()}`)
+        console.log(`cloned repository ${clonedRepository.workdir()}`)
         callback(null, clonedRepository);
     }).catch(function(error) {
         console.log(`Error in cloning: ${error}`);
