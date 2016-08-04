@@ -23,7 +23,7 @@ const GitHubApi = require("github");
 const git = require("nodegit");
 const untildify = require('untildify');
 const async = require('async');
-const versionHandler = require( __dirname + '/versionHandler.js');
+const gittags = require("git-tags");
 const spmHandler = require( __dirname + '/spmHandler.js');
 
 function getRepositoriesToHandle(callback) {
@@ -113,14 +113,14 @@ function cloneRepositoryByURLAndName(repositoryURL, repositoryName, workDirector
     });
 }
 
-function getRepositoryInfo(clonedRepository, repositoryName, workDirectory, callback) {
-    const repositoryDirectory = workDirectory + '/' + repositoryName;
-
-    git.Tag.list(clonedRepository).then(function(tags) {
-        const largestVersion = versionHandler.getLargest(tags, repositoryName);
-        console.log(`last tag in ${repositoryName} is ${versionHandler.asString(largestVersion)}`);
-        spmHandler.getPackageAsJSON(repositoryDirectory, function(error, packageJSON) {
-            callback(error, { repository: clonedRepository, name: repositoryName,
+function getRepositoryInfo(githubAPIRepository, repositoryName, workDirectory, callback) {
+    gittags.latest(githubAPIRepository.workdir(), function(error, largestVersion) {
+        if (error) {
+            callback(error);
+        }
+        console.log(`last tag in ${repositoryName} is ${largestVersion}`);
+        spmHandler.getPackageAsJSON(githubAPIRepository.workdir(), function(error, packageJSON) {
+            callback(error, { repository: githubAPIRepository, name: repositoryName,
                               largestVersion: largestVersion, packageJSON: packageJSON});
         });
     });
@@ -131,7 +131,7 @@ function isKituraCoreRepository(repository) {
 }
 
 function calculateNewVersions(kituraVersion, decoratedRepositories, callback) {
-    console.log(`got ${decoratedRepositories.length} repositories, ${versionHandler.asString(kituraVersion)}`);
+    console.log(`got ${decoratedRepositories.length} repositories, ${kituraVersion}`);
 
     async.filter(decoratedRepositories, function(decoratedRepository, filterCallback) {
         wasRepositoryChangedAfterVersion(decoratedRepository.largestVersion,
@@ -144,8 +144,6 @@ function calculateNewVersions(kituraVersion, decoratedRepositories, callback) {
 }
 
 function wasRepositoryChangedAfterVersion(version, repository, callback) {
-    const versionString = versionHandler.asString(version);
-
-    console.log(`checking if ${repository.workdir()} was changed after ${versionString}`);
+    console.log(`checking if ${repository.workdir()} was changed after ${version}`);
     callback(null, true);
 }

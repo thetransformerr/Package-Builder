@@ -14,7 +14,6 @@
  * limitations under the License.
  **/
 
-const versionHandler = require( __dirname + '/versionHandler.js');
 const repositoryHandler = require( __dirname + '/repositoryHandler.js');
 const makeWorkDirectory = require( __dirname + '/makeWorkDirectory.js');
 const async = require('async');
@@ -22,7 +21,7 @@ const parameters = require( __dirname + '/parameters.js');
 
 const swiftVersion = parameters.swiftVersion;
 const kituraVersion = parameters.kituraVersion;
-console.log(`setting Kitura Version to ${versionHandler.asString(kituraVersion)}`);
+console.log(`setting Kitura Version to ${kituraVersion}`);
 console.log(`setting swift version to ${swiftVersion}`);
 
 function setup(callback) {
