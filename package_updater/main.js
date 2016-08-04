@@ -28,9 +28,7 @@ console.log(`setting swift version to ${swiftVersion}`);
 function setup(callback) {
     async.parallel({ workDirectory: makeWorkDirectory,
                      repositoriesToHandle: repositoryHandler.getRepositoriesToHandle
-    }, function(error, results) {
-        callback(error, results.repositoriesToHandle, results.workDirectory);
-    });
+    }, (error, results) =>  callback(error, results.repositoriesToHandle, results.workDirectory));
 }
 
 async.waterfall([setup, repositoryHandler.clone], function(error, result) {
