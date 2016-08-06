@@ -15,7 +15,7 @@
  * limitations under the License.
  **/
 
-module.exports = {getNewVersions: getNewVersions, setVersions: setVersions};
+module.exports = {getNewVersions: getNewVersions, logDecoratedRepositories: logDecoratedRepositories};
 
 const git = require("nodegit");
 const GittoolsRepository = require("git-tools");
@@ -37,13 +37,6 @@ function getNewVersions(kituraVersion, repositories, callback) {
 
         callback(null, repositoriesToBumpVersion, newVersions);
     });
-}
-
-function setVersions(repositories, versions, callback) {
-    console.log(`${Object.keys(versions).length} repositories to set versions:`);
-    Object.keys(versions).forEach(repository =>
-                                  console.log(`\t ${repository} ${versions[repository]}`));
-    callback(null, 'done');
 }
 
 // @param repository - decorated repository (nodegit repository, githubAPI repository, largestVersion, packageJSON)

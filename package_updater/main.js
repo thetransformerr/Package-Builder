@@ -24,6 +24,7 @@ const swiftVersion = parameters.swiftVersion;
 const kituraVersion = parameters.kituraVersion;
 console.log(`setting Kitura Version to ${kituraVersion}`);
 console.log(`setting swift version to ${swiftVersion}`);
+const branchName = `automatic_migration_to_${kituraVersion}`;
 
 function setup(callback) {
     async.parallel({ workDirectory: makeWorkDirectory,
@@ -34,7 +35,8 @@ function setup(callback) {
 async.waterfall([setup,
                  repositoryHandler.clone,
                  async.apply(versionHandler.getNewVersions, kituraVersion),
-                 versionHandler.setVersions],
+                 async.apply(repositoryHandler.pushNewVersions, branchName, swiftVersion),
+                 async.apply(repositoryHandler.submitPRs, branchName)],
                 function(error, result) {
                     if (error) {
                         return console.error(`Error in updating repositories ${error}`);

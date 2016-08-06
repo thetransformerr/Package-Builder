@@ -14,7 +14,8 @@
  * limitations under the License.
  **/
 
-module.exports = {getRepositoriesToHandle: getRepositoriesToHandle, clone: clone};
+module.exports = {getRepositoriesToHandle: getRepositoriesToHandle, clone: clone, pushNewVersions: pushNewVersions,
+                  submitPRs: submitPRs};
 
 const readline = require('readline');
 const fs = require('fs');
@@ -24,6 +25,7 @@ const untildify = require('untildify');
 const async = require('async');
 const gittags = require("git-tags");
 const spmHandler = require( __dirname + '/spmHandler.js');
+const versionHandler = require( __dirname + '/versionHandler.js');
 
 function getRepositoriesToHandle(callback) {
     async.parallel({
@@ -126,4 +128,17 @@ function getDecoratedRepository(repository, githubAPIRepository, workDirectory, 
                               largestVersion: largestVersion, packageJSON: packageJSON});
         });
     });
+}
+
+function pushNewVersions(branchName, swiftVersion, repositories, versions, callback) {
+    console.log(`${Object.keys(versions).length} repositories to push:`);
+    Object.keys(versions).forEach(repository =>
+                                  console.log(`\t ${repository} ${versions[repository]}`));
+    callback(null, repositories);
+
+}
+
+function submitPRs(branchName, repositories, callback) {
+    versionHandler.logDecoratedRepositories(repositories, 'submiting PRs for repositories:');
+    callback(null, 'done');
 }
