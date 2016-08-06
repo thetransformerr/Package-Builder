@@ -105,7 +105,7 @@ function getDependentRepositories(repositoriesToCheck, dependeeRepositories) {
 function doesRepositoryDependOn(packageJSON, dependeeRepositories) {
     return packageJSON.dependencies.some(function(dependency) {
         return dependeeRepositories.some(dependeeRepository =>
-                                         dependeeRepository.githubAPIRepository.clone_url == dependency.url);
+                                         dependeeRepository.githubAPIRepository.clone_url === dependency.url);
     });
 }
 
