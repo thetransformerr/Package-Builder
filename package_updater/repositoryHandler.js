@@ -108,10 +108,7 @@ function cloneRepositoryByURLAndName(repositoryURL, repositoryName, workDirector
     git.Clone(repositoryURL, repositoryDirectory).then(function(clonedRepository) {
         console.log(`cloned repository ${clonedRepository.workdir()}`)
         callback(null, clonedRepository);
-    }).catch(function(error) {
-        console.log(`Error in cloning: ${error}`);
-        callback(error, null);
-    });
+    }).catch(callback);
 }
 
 // @param repositories - githubAPI Repository
