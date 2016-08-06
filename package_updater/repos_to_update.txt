@@ -13,10 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ##
-Kitura
-Kitura-sys
-Kitura-net
-Kitura-Sample
-Kitura-TemplateEngine
-SwiftyJSON
-HeliumLogger
+SwiftyJSON # did not change
+SwiftyJSON-Sample # should change to the next version (not Kitura common version)
+Kitura-TemplateEngine # changed
+Kitura-MustacheTemplateEngine # should change since Kitura-TemplateEngine changes
