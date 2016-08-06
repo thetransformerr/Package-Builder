@@ -15,7 +15,7 @@
  **/
 
 module.exports = { getRepositoriesToHandle: getRepositoriesToHandle, clone: clone,
-                   calculateNewVersions: calculateNewVersions };
+                   getNewVersions: getNewVersions };
 
 const readline = require('readline');
 const fs = require('fs');
@@ -136,9 +136,9 @@ function isKituraCoreRepository(repository) {
 }
 
 // @param repositories - decorated repositories (nodegit repository, githubAPI repository, largestVersion, packageJSON)
-function calculateNewVersions(kituraVersion, repositories, callback) {
+function getNewVersions(kituraVersion, repositories, callback) {
     logDecoratedRepositories(repositories, `calculate new versions for repositories below, kitura version ${kituraVersion}`);
-    calculatedRepositoriesToBumpVersion(repositories,
+    getRepositoriesToBumpVersion(repositories,
         function(error, repositoriesToBumpVersion) {
             console.log(`${repositoriesToBumpVersion.length} repositories to bump version`);
             callback(null, repositoriesToBumpVersion);
@@ -146,7 +146,7 @@ function calculateNewVersions(kituraVersion, repositories, callback) {
 }
 
 // @param repositories - decorated repositories (nodegit repository, githubAPI repository, largestVersion, packageJSON)
-function calculatedRepositoriesToBumpVersion(repositories, callback) {
+function getRepositoriesToBumpVersion(repositories, callback) {
     getChangedRepositories(repositories, function(error, changedRepositories) {
         logDecoratedRepositories(changedRepositories, 'changed repositories');
         const unchangedRepositories = subtractArray(repositories, changedRepositories);

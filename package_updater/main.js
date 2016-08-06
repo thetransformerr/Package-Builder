@@ -32,7 +32,7 @@ function setup(callback) {
 
 async.waterfall([setup,
                  repositoryHandler.clone,
-                 async.apply(repositoryHandler.calculateNewVersions, kituraVersion)],
+                 async.apply(repositoryHandler.getNewVersions, kituraVersion)],
                  function(error, result) {
                     if (error) {
                         return console.error(`Error in updating repositories ${error}`);
