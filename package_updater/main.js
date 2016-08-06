@@ -33,6 +33,7 @@ parameters.read(function() {
                      async.apply(versionHandler.getNewVersions, parameters.kituraVersion),
                      shouldPush,
                      async.apply(repositoryHandler.pushNewVersions, branchName, parameters.swiftVersion),
+                     shouldSubmitPRs,
                      async.apply(repositoryHandler.submitPRs, branchName)],
                     function(error, result) {
                         if (error) {
@@ -62,6 +63,17 @@ function shouldPush(repositories, newVersions, callback) {
             callback(null, repositories, newVersions);
         } else {
             callback(getGoodByeMessage(), null, null);
+        }
+    });
+}
+
+function shouldSubmitPRs(repositories, callback) {
+    versionHandler.logDecoratedRepositories(repositories, 'Repositories to submit PRs:');
+    parameters.shouldSubmitPRs(function(shouldSubmitPRs) {
+        if (shouldSubmitPRs) {
+            callback(null, repositories);
+        } else {
+            callback(getGoodByeMessage(), null);
         }
     });
 }
