@@ -22,8 +22,6 @@ const async = require('async');
 function Parameters() {
     this.swiftVersion = null;
     this.kituraVersion = null;
-    this.pushWithoutPrompt = null;
-    this.submitPRsWithoutPrompt = null;
 }
 
 Parameters.prototype.read = function(callback) {
