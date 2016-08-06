@@ -22,12 +22,12 @@ const GittoolsRepository = require('git-tools');
 const semver = require('semver');
 const async = require('async');
 
-// @param repository - decorated repository (nodegit repository, githubAPI repository, largestVersion, packageJSON)
+// @param repository - Repository
 function isKituraCoreRepository(repository) {
     return repository.githubAPIRepository.name.startsWith('Kitura');
 }
 
-// @param repositories - decorated repositories (nodegit repository, githubAPI repository, largestVersion, packageJSON)
+// @param repositories - Repository
 function getNewVersions(kituraVersion, repositories, callback) {
     logDecoratedRepositories(repositories, `calculate new versions for repositories below, kitura version ${kituraVersion}`);
     getRepositoriesToBumpVersion(repositories, function(error, repositoriesToBumpVersion) {
@@ -39,7 +39,7 @@ function getNewVersions(kituraVersion, repositories, callback) {
     });
 }
 
-// @param repository - decorated repository (nodegit repository, githubAPI repository, largestVersion, packageJSON)
+// @param repository - Repository
 function getBumpedVersion(repository, kituraVersion) {
     if (isKituraCoreRepository(repository)) {
         return kituraVersion;
@@ -47,7 +47,7 @@ function getBumpedVersion(repository, kituraVersion) {
     return semver.inc(repository.largestVersion, 'minor');
 }
 
-// @param repositories - decorated repositories (nodegit repository, githubAPI repository, largestVersion, packageJSON)
+// @param repositories - Repository
 function getRepositoriesToBumpVersion(repositories, callback) {
     getChangedRepositories(repositories, function(error, changedRepositories) {
         if (error) {
@@ -95,13 +95,13 @@ function getTransitiveClosureOfDependencies(repositoriesToCheck, dependeeReposit
     return dependentRepositories;
 }
 
-// @param repositoriesToCheck - decorated repositories (nodegit repository, githubAPI repository, largestVersion, packageJSON)
-// @param dependeeRepositories - decorated repositories (nodegit repository, githubAPI repository, largestVersion, packageJSON)
+// @param repositoriesToCheck - Repository
+// @param dependeeRepositories - Repository
 function getDependentRepositories(repositoriesToCheck, dependeeRepositories) {
     return repositoriesToCheck.filter(repository => doesRepositoryDependOn(repository.packageJSON, dependeeRepositories));
 }
 
-// @param dependeeRepositories - decorated repositories (nodegit repository, githubAPI repository, largestVersion, packageJSON)
+// @param dependeeRepositories - Repository
 function doesRepositoryDependOn(packageJSON, dependeeRepositories) {
     return packageJSON.dependencies.some(function(dependency) {
         return dependeeRepositories.some(dependeeRepository =>
@@ -109,7 +109,7 @@ function doesRepositoryDependOn(packageJSON, dependeeRepositories) {
     });
 }
 
-// @param repositoriesToCheck - decorated repositories (nodegit repository, githubAPI repository, largestVersion, packageJSON)
+// @param repositoriesToCheck - Repository
 function getChangedRepositories(repositories, callback) {
     async.filter(repositories, function(repository, filterCallback) {
         wasRepositoryChangedAfterVersion(repository.largestVersion, repository.nodegitRepository,
@@ -117,7 +117,7 @@ function getChangedRepositories(repositories, callback) {
     }, callback);
 }
 
-// @param nodegit repository
+// @param repository - nodegit repository
 function wasRepositoryChangedAfterVersion(version, repository, callback) {
     getTagCommit(version, repository.workdir(), function(error, tagCommit) {
         if (error) {

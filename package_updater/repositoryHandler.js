@@ -113,9 +113,9 @@ function cloneRepositoryByURLAndName(repositoryURL, repositoryName, workDirector
     }).catch(callback);
 }
 
-// @param repositories - githubAPI Repository
-// @param callback callback(error, decoratedRepositories)
-// decorated Repositories (nodegit repository, largestVersion, name, packageJSON)
+// @param repositories - githubAPI repository
+// @param callback callback(error, repository)
+
 function getDecoratedRepository(repository, githubAPIRepository, workDirectory, callback) {
     gittags.latest(repository.workdir(), function(error, largestVersion) {
         if (error) {
@@ -135,7 +135,7 @@ function pushNewVersions(branchName, swiftVersion, repositories, versions, callb
               callback);
 }
 
-// @param repository - decorated repository (nodegit repository, githubAPI repository, largestVersion, packageJSON)
+// @param repository - Repository
 function pushNewVersion(branchName, swiftVersion, versions, repository, callback) {
     console.log(`handling repository ${repository.githubAPIRepository.name}`);
     console.log(`\tbranch ${branchName} swiftVersion ${swiftVersion}`);
@@ -145,7 +145,7 @@ function pushNewVersion(branchName, swiftVersion, versions, repository, callback
                     error => callback(error, repository));
 }
 
-// @param repositories - decorated repositories (nodegit repository, githubAPI repository, largestVersion, packageJSON)
+// @param repositories - Repository
 function submitPRs(branchName, repositories, callback) {
     versionHandler.logDecoratedRepositories(repositories, 'submiting PRs for repositories:');
     callback(null, 'done');
@@ -161,7 +161,7 @@ function createBranch(branchName, repository, callback) {
     }).catch(callback);
 }
 
-// @param repository - decorated repository (nodegit repository, githubAPI repository, largestVersion, packageJSON)
+// @param repository - Repository
 function updatePackageDotSwift(repository, versions, branchReference, callback) {
     spmHandler.updateDependencies(repository.nodegitRepository.workdir(), repository.packageJSON, versions,
         function(error, updatedDependencies) {
@@ -179,7 +179,6 @@ function updatePackageDotSwift(repository, versions, branchReference, callback) 
         });
 }
 
-// @param repository - nodegit repository
 function commitPackageDotSwift(repositoryDirectory, updatedDependencies, branchReference, callback) {
     var message = 'updated dependency versions in Package.swift';
     var detailsMessage = composeDetailsUpdatePackageDotSwiftCommitMessage(updatedDependencies);
