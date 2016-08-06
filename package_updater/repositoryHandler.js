@@ -73,19 +73,20 @@ function getIBMSwiftRepositories(callback) {
         timeout: 5000
     });
 
-    fs.readFile(untildify('~/.ssh/package_updater_github_token.txt'), 'utf8', function (error, token) {
-        if (error) {
-            callback(error, null);
-        }
+    fs.readFile(untildify('~/.ssh/package_updater_github_token.txt'), 'utf8',
+         function (error, token) {
+             if (error) {
+                 callback(error, null);
+             }
 
-        github.authenticate({ type: "oauth", token: token.trim() });
+             github.authenticate({ type: "oauth", token: token.trim() });
 
-        github.repos.getForOrg({
-            org: "IBM-Swift",
-            type: "all",
-            per_page: 300
-        }, callback);
-    });
+             github.repos.getForOrg({
+                 org: "IBM-Swift",
+                 type: "all",
+                 per_page: 300
+             }, callback);
+         });
 }
 
 function clone(repositories, workDirectory, callback) {
@@ -95,8 +96,7 @@ function clone(repositories, workDirectory, callback) {
                 if (error) {
                     return callback(error, null);
                 }
-                getDecoratedRepository(clonedRepository, repository.name, workDirectory,
-                                       callback);
+                getDecoratedRepository(clonedRepository, repository, workDirectory, callback);
             });
     }
     async.map(repositories, cloneRepository, callback);
@@ -116,26 +116,26 @@ function cloneRepositoryByURLAndName(repositoryURL, repositoryName, workDirector
 
 // @param repositories - githubAPI Repository
 // @param callback callback(error, decoratedRepositories)
-// decorated Repositories (githubAPI Repository, largestVersion, name, packageJSON)
-function getDecoratedRepository(repository, repositoryName, workDirectory, callback) {
+// decorated Repositories (nodegit repository, largestVersion, name, packageJSON)
+function getDecoratedRepository(repository, githubAPIRepository, workDirectory, callback) {
     gittags.latest(repository.workdir(), function(error, largestVersion) {
         if (error) {
             callback(error);
         }
-        console.log(`last tag in ${repositoryName} is ${largestVersion}`);
+        console.log(`last tag in ${githubAPIRepository.name} is ${largestVersion}`);
         spmHandler.getPackageAsJSON(repository.workdir(), function(error, packageJSON) {
-            callback(error, { repository: repository, name: repositoryName,
+            callback(error, { repository: repository, githubAPIRepository: githubAPIRepository,
                               largestVersion: largestVersion, packageJSON: packageJSON});
         });
     });
 }
 
-// @param repository - decorated repository (githubAPI Repository, largestVersion, name, packageJSON)
+// @param repository - decorated repository (nodegit repository, githubAPI repository, largestVersion, packageJSON)
 function isKituraCoreRepository(repository) {
-    return repository.name.startsWith('Kitura');
+    return repository.githubAPIRepository.name.startsWith('Kitura');
 }
 
-// @param repositories - decorated repositories (githubAPI Repository, largestVersion, name, packageJSON)
+// @param repositories - decorated repositories (nodegit repository, githubAPI repository, largestVersion, packageJSON)
 function calculateNewVersions(kituraVersion, repositories, callback) {
     console.log(`got ${repositories.length} repositories, ${kituraVersion}`);
     calculatedRepositoriesToBumpVersion(repositories,
@@ -145,7 +145,7 @@ function calculateNewVersions(kituraVersion, repositories, callback) {
         });
 }
 
-// @param repositories - decorated repositories (githubAPI Repository, largestVersion, name, packageJSON)
+// @param repositories - decorated repositories (nodegit repository, githubAPI repository, largestVersion, packageJSON)
 function calculatedRepositoriesToBumpVersion(repositories, callback) {
     getChangedRepositories(repositories, function(error, changedRepositories) {
         const currentIterationChangedRepositories = changedRepositories;
@@ -164,13 +164,21 @@ function getTransitiveClosureOfDependencies(repositoriesToCheck, dependeeReposit
 
 }
 
-// @param repositoriesToCheck - decorated repositories (githubAPI Repository, largestVersion, name, packageJSON)
-// @param dependeeRepositories - decorated repositories (githubAPI Repository, largestVersion, name, packageJSON)
+// @param repositoriesToCheck - decorated repositories (nodegit repository, githubAPI repository, largestVersion, packageJSON)
+// @param dependeeRepositories - decorated repositories (nodegit repository, githubAPI repository, largestVersion, packageJSON)
 function getDependerRepositories(repositoriesToCheck, dependeeRepositories, callback) {
 
 }
 
-// @param repositoriesToCheck - decorated repositories (githubAPI Repository, largestVersion, name, packageJSON)
+// @param dependeeRepositories - decorated repositories (nodegit repository, githubAPI repository, largestVersion, packageJSON)
+function doesRepositoryDependOn(packageJSON, dependeeRepositories) {
+    return packageJSON.dependencies.some(function(dependency) {
+        return dependeeRepositories.some(dependeeRepository =>
+                                         dependeeRepository.clone_url == dependency.url);
+    });
+}
+
+// @param repositoriesToCheck - decorated repositories (nodegit repository, githubAPI repository, largestVersion, packageJSON)
 function getChangedRepositories(repositories, callback) {
     async.filter(repositories, function(repository, filterCallback) {
         wasRepositoryChangedAfterVersion(repository.largestVersion, repository.repository,
@@ -178,7 +186,7 @@ function getChangedRepositories(repositories, callback) {
     }, callback);
 }
 
-// @param githubAPI repository
+// @param nodegit repository
 function wasRepositoryChangedAfterVersion(version, repository, callback) {
     getTagCommit(version, repository.workdir(), function(error, commitSHA) {
         if (error) {
