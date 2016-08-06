@@ -24,6 +24,7 @@ const git = require("nodegit");
 const untildify = require('untildify');
 const async = require('async');
 const gittags = require("git-tags");
+const GittoolsRepository = require("git-tools");
 const spmHandler = require( __dirname + '/spmHandler.js');
 
 function getRepositoriesToHandle(callback) {
@@ -143,7 +144,29 @@ function calculateNewVersions(kituraVersion, decoratedRepositories, callback) {
     });
 }
 
-function wasRepositoryChangedAfterVersion(version, repository, callback) {
-    console.log(`checking if ${repository.workdir()} was changed after ${version}`);
-    callback(null, true);
+function wasRepositoryChangedAfterVersion(version, githubAPIRepository, callback) {
+    console.log(`checking if ${githubAPIRepository.workdir()} was changed after ${version}`);
+    getTagCommit(version, githubAPIRepository.workdir(), function(error, commitSHA) {
+        if (error) {
+            return callback(error, false);
+        }
+        githubAPIRepository.getHeadCommit().then(function(headCommit) {
+            callback(null, !(commitSHA === headCommit.sha()));
+        });
+    });
+}
+
+function getTagCommit(tag, repositoryDirectory, callback) {
+    const gittoolsRepository = new GittoolsRepository(repositoryDirectory);
+    gittoolsRepository.tags(function(error, tags) {
+        if (error) {
+            return callback(error, null);
+        }
+        const matchingTags = tags.filter(tagToFilter => tagToFilter.name == tag);
+        if (matchingTags.length != 1) {
+            return callback(`no matching tags for ${version} in ${repositoryDirectory}`, null);
+        }
+        const matchingTag = matchingTags[0];
+        callback(error, matchingTag.sha);
+    });
 }
