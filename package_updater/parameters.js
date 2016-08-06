@@ -27,70 +27,64 @@ function Parameters() {
 Parameters.prototype.read = function(callback) {
     const self = this;
 
-    const readlineInterface = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-    });
-
-    getKituraVersion(readlineInterface, function(kituraVersion) {
+    getKituraVersion(function(kituraVersion) {
         self.kituraVersion = kituraVersion;
-        getSwiftVersion(readlineInterface, function(swiftVersion) {
+        getSwiftVersion(function(swiftVersion) {
             self.swiftVersion = swiftVersion;
-            readlineInterface.close();
             callback();
         });
     });
 }
 
-function getKituraVersion(readlineInterface, callback) {
-    return getVerifiedParameter(readlineInterface, 2,
-                                    'Please enter Kitura version to set in format <major>.<minor>, e.g. 0.26',
-                                    kituraVersion => /^(\d+)\.(\d+)$/.test(kituraVersion),
-                                    callback);
+function getKituraVersion(callback) {
+    return getVerifiedParameter(2,
+        'Please enter Kitura version to set in format <major>.<minor>, e.g. 0.26',
+         kituraVersion => /^(\d+)\.(\d+)$/.test(kituraVersion), callback);
 }
 
-function getSwiftVersion(readlineInterface, callback) {
-    return getParameter(readlineInterface, 3,
+function getSwiftVersion(callback) {
+    return getParameter(3,
         'Please enter swift version, e.g. DEVELOPMENT-SNAPSHOT-2016-06-20-a', callback);
 }
 
-function getParameter(readlineInterface, parameterNumber, question, callback) {
+function getParameter(parameterNumber, question, callback) {
     if (process.argv.length > parameterNumber) {
         callback(process.argv[parameterNumber]);
     }
     else {
-        getParameterFromUser(readlineInterface, question, callback);
+        getParameterFromUser(question, callback);
     }
 }
 
-function getParameterFromUser(readlineInterface, question, callback) {
+function getParameterFromUser(question, callback) {
+    const readlineInterface = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+
     readlineInterface.question(question + ' > ',
-                               answer => callback(answer.trim()));
+                               function(answer) {
+                                   readlineInterface.close();
+                                   callback(answer.trim());
+                               });
 }
 
-function getVerifiedParameter(readlineInterface, parameterNumber, question, verify, callback) {
+function getVerifiedParameter(parameterNumber, question, verify, callback) {
     var parameter = process.argv[parameterNumber];
 
     function getParameter(callback) {
-        getParameterFromUser(readlineInterface, question, answer => { parameter = answer;
-                                                                      callback(null);});
+        getParameterFromUser(question, answer => { parameter = answer;
+                                                   callback(null);});
     }
 
     async.until(() => verify(parameter), getParameter, () => callback(parameter));
 }
 
 function getBooleanParameter(parameterNumber, question, callback) {
-    const readlineInterface = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-    });
-
-    getVerifiedParameter(readlineInterface, parameterNumber,
+    getVerifiedParameter(parameterNumber,
                          question + ' [Yes|No]',
                          answer => answer === 'Yes' || answer === 'No',
-                         answer => { console.log('closing readlineInterface');
-                                     readlineInterface.close();
-                                     callback(answer === 'Yes')});
+                         answer => callback(answer === 'Yes'));
 }
 
 
