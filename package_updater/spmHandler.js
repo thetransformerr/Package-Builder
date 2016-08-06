@@ -59,7 +59,7 @@ function updateDependency(repositoryDirectory, dependencyURL, version, callback)
     console.log(`updating dependency of ${dependencyURL} to version ${version}, major ${major}, minor ${minor}`);
     replace({
         regex: '\\.Package\\(url: \\"' + dependencyURL + '\\", majorVersion: [0-9]+, minor: [0-9]+\\)',
-        replacement: '.Package (url: "' + dependencyURL + '", majorVersion: ' + major + ', minor: ' + minor + ')',
+        replacement: '.Package(url: "' + dependencyURL + '", majorVersion: ' + major + ', minor: ' + minor + ')',
         paths: [repositoryDirectory + '/Package.swift'],
         recursive: false,
         silent: true,
