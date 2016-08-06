@@ -31,13 +31,14 @@ parameters.read(function() {
     async.waterfall([setup,
                      repositoryHandler.clone,
                      async.apply(versionHandler.getNewVersions, parameters.kituraVersion),
+                     shouldPush,
                      async.apply(repositoryHandler.pushNewVersions, branchName, parameters.swiftVersion),
                      async.apply(repositoryHandler.submitPRs, branchName)],
                     function(error, result) {
                         if (error) {
-                            return console.error(`Error in updating repositories ${error}`);
+                            return console.log(error);
                         }
-                        console.log('Done');
+                        console.log(getGoodByeMessage());
                     });
 });
 
@@ -45,4 +46,22 @@ function setup(callback) {
     async.parallel({ workDirectory: makeWorkDirectory,
                      repositoriesToHandle: repositoryHandler.getRepositoriesToHandle
                    }, (error, results) =>  callback(error, results.repositoriesToHandle, results.workDirectory));
+}
+
+function getGoodByeMessage() {
+    return 'Done';
+}
+
+function shouldPush(repositories, newVersions, callback) {
+    console.log(`${Object.keys(newVersions).length} repositories to push:`);
+    Object.keys(newVersions).forEach(repository =>
+                                     console.log(`\t ${repository} ${newVersions[repository]}`));
+
+    parameters.shouldPush(function(shouldPush) {
+        if (shouldPush) {
+            callback(null, repositories, newVersions);
+        } else {
+            callback(getGoodByeMessage(), null, null);
+        }
+    });
 }

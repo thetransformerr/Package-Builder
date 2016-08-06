@@ -25,7 +25,6 @@ function Parameters() {
 }
 
 Parameters.prototype.read = function(callback) {
-    const argv = process.argv;
     const self = this;
 
     const readlineInterface = readline.createInterface({
@@ -60,19 +59,45 @@ function getParameter(readlineInterface, parameterNumber, question, callback) {
         callback(process.argv[parameterNumber]);
     }
     else {
-        readlineInterface.question(question + ' > ',
-                                   answer => callback(answer.trim()));
+        getParameterFromUser(readlineInterface, question, callback);
     }
 }
 
-function getVerifiedParameter(readlineInterface, parameterNumber, question, verify, callback) {
-    var parameter = '';
+function getParameterFromUser(readlineInterface, question, callback) {
+    readlineInterface.question(question + ' > ',
+                               answer => callback(answer.trim()));
+}
 
-    function readParameter(callback) {
-        getParameter(readlineInterface, parameterNumber, question,
-                     answer => { parameter = answer;
-                                 callback(null);});
+function getVerifiedParameter(readlineInterface, parameterNumber, question, verify, callback) {
+    var parameter = process.argv[parameterNumber];
+
+    function getParameter(callback) {
+        getParameterFromUser(readlineInterface, question, answer => { parameter = answer;
+                                                                      callback(null);});
     }
 
-    async.doUntil(readParameter, () => verify(parameter), () => callback(parameter));
+    async.until(() => verify(parameter), getParameter, () => callback(parameter));
+}
+
+function getBooleanParameter(parameterNumber, question, callback) {
+    const readlineInterface = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+
+    getVerifiedParameter(readlineInterface, parameterNumber,
+                         question + ' [Yes|No]',
+                         answer => answer === 'Yes' || answer === 'No',
+                         answer => { console.log('closing readlineInterface');
+                                     readlineInterface.close();
+                                     callback(answer === 'Yes')});
+}
+
+
+Parameters.prototype.shouldPush = function(callback) {
+    getBooleanParameter(4, 'Would you like to push the changes', callback);
+}
+
+Parameters.prototype.shouldSubmitPRs = function(callback) {
+    getBooleanParameter(5, 'Would you like to submit the PRs?', callback);
 }
