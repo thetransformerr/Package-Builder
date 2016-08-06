@@ -14,8 +14,10 @@
  * limitations under the License.
  **/
 
-
 module.exports = Parameters;
+
+const readline = require('readline');
+const async = require('async');
 
 function Parameters() {
     this.swiftVersion = null;
@@ -25,21 +27,52 @@ function Parameters() {
 }
 
 Parameters.prototype.read = function(callback) {
-    const argv = process.argv
-    const exit = process.exit
+    const argv = process.argv;
+    const self = this;
 
-    if (argv.length < 4) {
-        console.warn('Format: npm start <major Kitura version to set>.<minor Kitura version to set> <swift version to set>')
-        exit();
+    const readlineInterface = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+
+    getKituraVersion(readlineInterface, function(kituraVersion) {
+        self.kituraVersion = kituraVersion;
+        getSwiftVersion(readlineInterface, function(swiftVersion) {
+            self.swiftVersion = swiftVersion;
+            readlineInterface.close();
+            callback();
+        });
+    });
+}
+
+function getKituraVersion(readlineInterface, callback) {
+    const argv = process.argv;
+
+    var kituraVersion = "";
+
+    function readKituraVersion(callback) {
+        if (argv.length >= 3) {
+            kituraVersion = argv[2];
+            callback(null);
+        }
+        else {
+            readlineInterface.question('Please enter Kitura version to set in format <major>.<minor>, e.g. 0.26 > ',
+                                       answer => { kituraVersion = answer.trim();
+                                                   callback(null);});
+        }
     }
 
-    this.kituraVersion = argv[2]
-    this.swiftVersion = argv[3]
+    async.doUntil(readKituraVersion, () => /^(\d+)\.(\d+)$/.test(kituraVersion),
+                  () => callback(kituraVersion));
+}
 
-    if (!/^(\d+)\.(\d+)$/.test(this.kituraVersion)) {
-        console.error('Kitura version parameter should be in the format <major>.<minor>');
-        exit();
+function getSwiftVersion(readlineInterface, callback) {
+    const argv = process.argv;
+    if (argv.length >= 4) {
+        callback(argv[3]);
     }
-
-    callback();
+    else {
+        readlineInterface.question('Please enter swift version, e.g. DEVELOPMENT-SNAPSHOT-2016-06-20-a > ',
+                                   answer => callback(answer.trim()));
+    }
 }
