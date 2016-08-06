@@ -27,6 +27,7 @@ const gittags = require('git-tags');
 const simplegit = require('simple-git');
 const spmHandler = require( __dirname + '/spmHandler.js');
 const versionHandler = require( __dirname + '/versionHandler.js');
+const Repository = require( __dirname + '/repository.js');
 
 function getRepositoriesToHandle(callback) {
     async.parallel({
@@ -122,8 +123,8 @@ function getDecoratedRepository(repository, githubAPIRepository, workDirectory, 
         }
         console.log(`last tag in ${githubAPIRepository.name} is ${largestVersion}`);
         spmHandler.getPackageAsJSON(repository.workdir(), function(error, packageJSON) {
-            callback(error, { repository: repository, githubAPIRepository: githubAPIRepository,
-                              largestVersion: largestVersion, packageJSON: packageJSON});
+            callback(error, new Repository(repository, githubAPIRepository,
+                                           largestVersion, packageJSON));
         });
     });
 }
