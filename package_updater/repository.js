@@ -25,3 +25,18 @@ function Repository(nodegitRepository, githubAPIRepository, largestVersion, pack
     this.largestVersion = largestVersion;
     this.packageJSON = packageJSON;
 }
+
+Repository.prototype.name = function() {
+    return this.githubAPIRepository.name;
+}
+
+Repository.prototype.directory = function() {
+    return this.nodegitRepository.workdir();
+}
+
+Repository.log = function(repositories, title, doNotPrintEmpty) {
+    if (repositories.length > 0) {
+        console.log(title);
+    }
+    repositories.forEach(repository => console.log(`\t${repository.name()}`));
+}

@@ -15,12 +15,13 @@
  * limitations under the License.
  **/
 
-module.exports = {getNewVersions: getNewVersions, logDecoratedRepositories: logDecoratedRepositories};
+module.exports = {getNewVersions: getNewVersions};
 
 const git = require('nodegit');
 const GittoolsRepository = require('git-tools');
 const semver = require('semver');
 const async = require('async');
+const Repository = require( __dirname + '/repository.js');
 
 // @param repository - Repository
 function isKituraCoreRepository(repository) {
@@ -29,7 +30,7 @@ function isKituraCoreRepository(repository) {
 
 // @param repositories - Repository
 function getNewVersions(kituraVersion, repositories, callback) {
-    logDecoratedRepositories(repositories, `calculate new versions for repositories below, kitura version ${kituraVersion}`);
+    Repository.log(repositories, `calculate new versions for repositories below, kitura version ${kituraVersion}`);
     getRepositoriesToBumpVersion(repositories, function(error, repositoriesToBumpVersion) {
         var newVersions = {};
         repositoriesToBumpVersion.forEach(repository =>
@@ -53,22 +54,15 @@ function getRepositoriesToBumpVersion(repositories, callback) {
         if (error) {
             callback(error, null, null);
         }
-        logDecoratedRepositories(changedRepositories, 'changed repositories');
+        Repository.log(changedRepositories, 'changed repositories');
         const unchangedRepositories = subtractArray(repositories, changedRepositories);
-        logDecoratedRepositories(unchangedRepositories, 'unchanged repositories');
+        Repository.log(unchangedRepositories, 'unchanged repositories');
         callback(null, getTransitiveClosureOfDependencies(unchangedRepositories, changedRepositories));
     });
 }
 
 function subtractArray(array1, array2) {
     return array1.filter(member => array2.indexOf(member) < 0);
-}
-
-function logDecoratedRepositories(repositories, title, doNotPrintEmpty) {
-    if (repositories.length > 0) {
-        console.log(title);
-    }
-    repositories.forEach(repository => console.log(`\t${repository.githubAPIRepository.name}`));
 }
 
 // dependee terms from https://en.wiktionary.org/wiki/dependee
@@ -85,7 +79,7 @@ function getTransitiveClosureOfDependencies(repositoriesToCheck, dependeeReposit
         console.log(`calculating transitive closure of dependencies iteration ${iteration++}`);
 
         currentDependentRepositories = getDependentRepositories(currentRepositoriesToCheck, currentDependeeRepositories);
-        logDecoratedRepositories(currentDependentRepositories, 'repositories that depend on changed repositories', true);
+        Repository.log(currentDependentRepositories, 'repositories that depend on changed repositories', true);
 
         dependentRepositories = dependentRepositories.concat(currentDependentRepositories);
         currentDependeeRepositories = currentDependentRepositories;

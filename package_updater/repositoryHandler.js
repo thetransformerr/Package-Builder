@@ -25,7 +25,6 @@ const untildify = require('untildify');
 const async = require('async');
 const gittags = require('git-tags');
 const spmHandler = require( __dirname + '/spmHandler.js');
-const versionHandler = require( __dirname + '/versionHandler.js');
 const Repository = require( __dirname + '/repository.js');
 
 function getRepositoriesToHandle(callback) {
@@ -146,7 +145,7 @@ function pushNewVersion(branchName, swiftVersion, versions, repository, callback
 
 // @param repositories - Repository
 function submitPRs(branchName, repositories, callback) {
-    versionHandler.logDecoratedRepositories(repositories, 'submiting PRs for repositories:');
+    Repository.log(repositories, 'submiting PRs for repositories:');
     callback(null, 'done');
 }
 

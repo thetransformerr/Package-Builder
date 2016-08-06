@@ -18,8 +18,10 @@ const async = require('async');
 const repositoryHandler = require( __dirname + '/repositoryHandler.js');
 const makeWorkDirectory = require( __dirname + '/makeWorkDirectory.js');
 const versionHandler = require( __dirname + '/versionHandler.js');
-const Parameters = require( __dirname + '/parameters.js');
 const git = require("nodegit");
+
+const Repository = require( __dirname + '/repository.js');
+const Parameters = require( __dirname + '/parameters.js');
 
 const parameters = new Parameters();
 var branchName = ""
@@ -76,7 +78,7 @@ function shouldPush(repositories, newVersions, callback) {
 }
 
 function shouldSubmitPRs(repositories, callback) {
-    versionHandler.logDecoratedRepositories(repositories, 'Repositories to submit PRs:');
+    Repository.log(repositories, 'Repositories to submit PRs:');
     parameters.shouldSubmitPRs(function(shouldSubmitPRs) {
         if (shouldSubmitPRs) {
             callback(null, repositories);
