@@ -33,7 +33,7 @@ function getNewVersions(kituraVersion, repositories, callback) {
     getRepositoriesToBumpVersion(repositories, function(error, repositoriesToBumpVersion) {
         var newVersions = {};
         repositoriesToBumpVersion.forEach(repository =>
-            newVersions[repository.githubAPIRepository.name] = getBumpedVersion(repository, kituraVersion));
+            newVersions[repository.githubAPIRepository.clone_url] = getBumpedVersion(repository, kituraVersion));
 
         callback(null, repositoriesToBumpVersion, newVersions);
     });
