@@ -122,7 +122,7 @@ function pushNewVersion(branchName, swiftVersion, versions, repository, callback
     console.log(`handling repository ${repository.githubAPIRepository.name}`);
     console.log(`\tbranch ${branchName} swiftVersion ${swiftVersion}`);
 
-    async.waterfall([async.apply(createBranch, branchName, repository.nodegitRepository),
+    async.series([async.apply(createBranch, branchName, repository.nodegitRepository),
                      async.apply(updatePackageDotSwift, repository, versions)],
                     error => callback(error, repository));
 }
@@ -138,13 +138,13 @@ function createBranch(branchName, repository, callback) {
     repository.getHeadCommit().then(function(commit) {
         git.Branch.create(repository, branchName, commit, false).then(function(reference) {
             repository.checkoutBranch(reference, new git.CheckoutOptions()).
-                then(() => callback(null,reference)).catch(callback);
+                then(() => callback(null)).catch(callback);
         }).catch(callback);
     }).catch(callback);
 }
 
 // @param repository - Repository
-function updatePackageDotSwift(repository, versions, branchReference, callback) {
+function updatePackageDotSwift(repository, versions, callback) {
     spmHandler.updateDependencies(repository.nodegitRepository.workdir(), repository.packageJSON, versions,
         function(error, updatedDependencies) {
             if (error) {
@@ -155,14 +155,14 @@ function updatePackageDotSwift(repository, versions, branchReference, callback) 
             }
             updatedDependencies = updatedDependencies.filter(member => member);
             if (updatedDependencies.length > 0) {
-                return commitPackageDotSwift(repository.simplegitRepository, updatedDependencies, branchReference, callback);
+                return commitPackageDotSwift(repository.simplegitRepository, updatedDependencies, callback);
             }
             callback(null);
         });
 }
 
 // @param repository - simplegit repository
-function commitPackageDotSwift(repository, updatedDependencies, branchReference, callback) {
+function commitPackageDotSwift(repository, updatedDependencies, callback) {
     var message = 'updated dependency versions in Package.swift';
     var detailsMessage = composeDetailsUpdatePackageDotSwiftCommitMessage(updatedDependencies);
     repository.commit(message, 'Package.swift', { '--message': detailsMessage}, callback);
