@@ -137,7 +137,7 @@ function isKituraCoreRepository(repository) {
 
 // @param repositories - decorated repositories (nodegit repository, githubAPI repository, largestVersion, packageJSON)
 function calculateNewVersions(kituraVersion, repositories, callback) {
-    console.log(`got ${repositories.length} repositories, ${kituraVersion}`);
+    logDecoratedRepositories(repositories, `calculate new versions for repositories below, kitura version ${kituraVersion}`);
     calculatedRepositoriesToBumpVersion(repositories,
         function(error, repositoriesToBumpVersion) {
             console.log(`${repositoriesToBumpVersion.length} repositories to bump version`);
@@ -148,7 +148,7 @@ function calculateNewVersions(kituraVersion, repositories, callback) {
 // @param repositories - decorated repositories (nodegit repository, githubAPI repository, largestVersion, packageJSON)
 function calculatedRepositoriesToBumpVersion(repositories, callback) {
     getChangedRepositories(repositories, function(error, changedRepositories) {
-        const currentIterationChangedRepositories = changedRepositories;
+        logDecoratedRepositories(changedRepositories, 'changed repositories');
         const unchangedRepositories = repositories.filter(repository => changedRepositories.indexOf(repository) < 0);
 
         console.log(`${changedRepositories.length} repositories were changed, ${unchangedRepositories.length} did not change`);
@@ -158,9 +158,10 @@ function calculatedRepositoriesToBumpVersion(repositories, callback) {
     });
 }
 
-// depender, dependee terms from https://en.wiktionary.org/wiki/dependee
-function getTransitiveClosureOfDependencies(repositoriesToCheck, dependeeRepositories) {
-    const currentIterationDependeeRepositories = dependeeRepositories;
+function logDecoratedRepositories(repositories, title) {
+    console.log(title);
+    repositories.forEach(repository => console.log(`\trepository name ${repository.githubAPIRepository.name}`));
+}
 
 }
 
