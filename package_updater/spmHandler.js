@@ -14,9 +14,12 @@
  * limitations under the License.
  **/
 
-module.exports = { getPackageAsJSON: getPackageAsJSON };
+module.exports = {getPackageAsJSON: getPackageAsJSON, updateDependencies: updateDependencies};
 
 const exec = require('child_process').exec;
+const async = require('async');
+const replace = require('replace');
+const semver = require('semver');
 
 function getPackageAsJSON(repositoryDirectory, callback) {
     const swiftDumpPackageCommand = `swift package dump-package --input ${repositoryDirectory}/Package.swift`;
@@ -35,4 +38,55 @@ function getPackageAsJSON(repositoryDirectory, callback) {
         console.log(`package name for ${repositoryDirectory} is ${packageJSON.name}`);
         callback(null, packageJSON);
     });
+}
+
+function updateDependencies(repositoryDirectory, packageJSON, versions, callback) {
+    console.log(`update dependencies in ${repositoryDirectory}`);
+
+    if (packageJSON.dependencies.length == 0) {
+        return callback(null);
+    }
+
+    async.eachSeries(packageJSON.dependencies, function(dependency, callback) {
+        const newVersion = versions[dependency.url];
+        if (newVersion) {
+            return updateDependency(repositoryDirectory, dependency.url, newVersion, callback);
+        }
+        callback(null);
+    }, callback);
+}
+
+function updateDependency(repositoryDirectory, dependencyURL, version, callback) {
+    const major = semver.major(version);
+    const minor = semver.minor(version);
+
+    console.log(`updating dependency of ${dependencyURL} to version ${version}, major ${major}, minor ${minor}`);
+    replace({
+        regex: '\\.Package\\(url: \\"' + dependencyURL + '\\", majorVersion: [0-9]+, minor: [0-9]+\\)',
+        replacement: '.Package (url: "' + dependencyURL + '", majorVersion: ' + major + ', minor: ' + minor + ')',
+        paths: [repositoryDirectory + '/Package.swift'],
+        recursive: false,
+        silent: true,
+    });
+
+    verifyThePackageWasUpdated(repositoryDirectory, dependencyURL, version, callback);
+}
+
+function verifyThePackageWasUpdated(repositoryDirectory, dependencyURL, version, callback) {
+    getPackageAsJSON(repositoryDirectory, function(error, packageJSON) {
+        if (error) {
+            callback(error);
+        }
+        if (hasDependencyWithVersions(packageJSON, dependencyURL, version)) {
+            callback(null);
+        } else {
+            callback(`Did not manage to update Package.swift in ${repositoryDirectory}.\n` +
+                     'Verify that the dependency is in format .Package(url: <https url>,  majorVersion: <major>, minor: <minor>), exactly without redundant whitespace.');
+        }
+    });
+}
+
+function hasDependencyWithVersions(packageJSON, dependencyURL, version) {
+    return packageJSON.dependencies.some(dependency =>
+        dependency.url === dependencyURL && dependency.version.lowerBound === version);
 }
