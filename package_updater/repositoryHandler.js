@@ -163,7 +163,7 @@ function logDecoratedRepositories(repositories, title, doNotPrintEmpty) {
     if (repositories.length > 0) {
         console.log(title);
     }
-    repositories.forEach(repository => console.log(`\trepository name ${repository.githubAPIRepository.name}`));
+    repositories.forEach(repository => console.log(`\t${repository.githubAPIRepository.name}`));
 }
 
 // dependee terms from https://en.wiktionary.org/wiki/dependee
