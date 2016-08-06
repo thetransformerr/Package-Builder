@@ -158,8 +158,14 @@ function calculatedRepositoriesToBumpVersion(repositories, callback) {
     });
 }
 
-function logDecoratedRepositories(repositories, title) {
-    console.log(title);
+function subtractArray(array1, array2) {
+    return array1.filter(member => array2.indexOf(member) < 0);
+}
+
+function logDecoratedRepositories(repositories, title, doNotPrintEmpty) {
+    if (repositories.length > 0) {
+        console.log(title);
+    }
     repositories.forEach(repository => console.log(`\trepository name ${repository.githubAPIRepository.name}`));
 }
 
