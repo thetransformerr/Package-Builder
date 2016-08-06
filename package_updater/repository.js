@@ -19,7 +19,7 @@ module.exports = Repository;
 const simplegit = require('simple-git');
 
 function Repository(nodegitRepository, githubAPIRepository, largestVersion, packageJSON) {
-    this.repository = nodegitRepository; // temporary - change to this.nodegitRepository
+    this.nodegitRepository = nodegitRepository;
     this.githubAPIRepository = githubAPIRepository;
     this.simplegitRepository = simplegit(nodegitRepository.workdir());
     this.largestVersion = largestVersion;

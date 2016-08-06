@@ -140,7 +140,7 @@ function pushNewVersion(branchName, swiftVersion, versions, repository, callback
     console.log(`handling repository ${repository.githubAPIRepository.name}`);
     console.log(`\tbranch ${branchName} swiftVersion ${swiftVersion}`);
 
-    async.waterfall([async.apply(createBranch, branchName, repository.repository),
+    async.waterfall([async.apply(createBranch, branchName, repository.nodegitRepository),
                      async.apply(updatePackageDotSwift, repository, versions)],
                     error => callback(error, repository));
 }
@@ -163,7 +163,7 @@ function createBranch(branchName, repository, callback) {
 
 // @param repository - decorated repository (nodegit repository, githubAPI repository, largestVersion, packageJSON)
 function updatePackageDotSwift(repository, versions, branchReference, callback) {
-    spmHandler.updateDependencies(repository.repository.workdir(), repository.packageJSON, versions,
+    spmHandler.updateDependencies(repository.nodegitRepository.workdir(), repository.packageJSON, versions,
         function(error, updatedDependencies) {
             if (error) {
                 return callback(error);
@@ -173,7 +173,7 @@ function updatePackageDotSwift(repository, versions, branchReference, callback) 
             }
             updatedDependencies = updatedDependencies.filter(member => member);
             if (updatedDependencies.length > 0) {
-                return commitPackageDotSwift(repository.repository.workdir(), updatedDependencies, branchReference, callback);
+                return commitPackageDotSwift(repository.nodegitRepository.workdir(), updatedDependencies, branchReference, callback);
             }
             callback(null);
         });
@@ -183,7 +183,6 @@ function updatePackageDotSwift(repository, versions, branchReference, callback) 
 function commitPackageDotSwift(repositoryDirectory, updatedDependencies, branchReference, callback) {
     var message = 'updated dependency versions in Package.swift';
     var detailsMessage = composeDetailsUpdatePackageDotSwiftCommitMessage(updatedDependencies);
-    console.log('detailsMessage = ' + detailsMessage);
     simplegit(repositoryDirectory).commit(message, 'Package.swift', { '--message': detailsMessage}, callback);
 }
 

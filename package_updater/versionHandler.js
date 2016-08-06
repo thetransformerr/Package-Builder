@@ -112,7 +112,7 @@ function doesRepositoryDependOn(packageJSON, dependeeRepositories) {
 // @param repositoriesToCheck - decorated repositories (nodegit repository, githubAPI repository, largestVersion, packageJSON)
 function getChangedRepositories(repositories, callback) {
     async.filter(repositories, function(repository, filterCallback) {
-        wasRepositoryChangedAfterVersion(repository.largestVersion, repository.repository,
+        wasRepositoryChangedAfterVersion(repository.largestVersion, repository.nodegitRepository,
                                          filterCallback);
     }, callback);
 }

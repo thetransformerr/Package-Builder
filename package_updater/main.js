@@ -63,7 +63,7 @@ function shouldPush(repositories, newVersions, callback) {
     Object.keys(newVersions).forEach(repository =>
                                      console.log(`\t ${repository} ${newVersions[repository]}`));
 
-    var signature = git.Signature.default(repositories[0].repository);
+    var signature = git.Signature.default(repositories[0].nodegitRepository);
     console.log(`signature to be used: ${signature.name()} ${signature.email()}`);
 
     parameters.shouldPush(function(shouldPush) {
