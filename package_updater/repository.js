@@ -17,6 +17,8 @@
 module.exports = Repository;
 
 const simplegit = require('simple-git');
+const gittags = require('git-tags');
+const spmHandler = require( __dirname + '/spmHandler.js');
 
 function Repository(nodegitRepository, githubAPIRepository, largestVersion, packageJSON) {
     this.nodegitRepository = nodegitRepository;
@@ -28,15 +30,32 @@ function Repository(nodegitRepository, githubAPIRepository, largestVersion, pack
 
 Repository.prototype.name = function() {
     return this.githubAPIRepository.name;
-}
+};
 
 Repository.prototype.directory = function() {
     return this.nodegitRepository.workdir();
-}
+};
 
 Repository.log = function(repositories, title, doNotPrintEmpty) {
     if (repositories.length > 0) {
         console.log(title);
     }
     repositories.forEach(repository => console.log(`\t${repository.name()}`));
-}
+};
+
+
+// @param repository - githubAPI repository
+// @param callback callback(error, repository)
+
+Repository.create = function(nodegitRepository, githubAPIRepository, workDirectory, callback) {
+    gittags.latest(nodegitRepository.workdir(), function(error, largestVersion) {
+        if (error) {
+            callback(error);
+        }
+        console.log(`last tag in ${githubAPIRepository.name} is ${largestVersion}`);
+        spmHandler.getPackageAsJSON(nodegitRepository.workdir(), function(error, packageJSON) {
+            callback(error, new Repository(nodegitRepository, githubAPIRepository,
+                                           largestVersion, packageJSON));
+        });
+    });
+};

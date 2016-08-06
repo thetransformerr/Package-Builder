@@ -23,7 +23,6 @@ const GithubAPI = require('github');
 const git = require('nodegit');
 const untildify = require('untildify');
 const async = require('async');
-const gittags = require('git-tags');
 const spmHandler = require( __dirname + '/spmHandler.js');
 const Repository = require( __dirname + '/repository.js');
 
@@ -89,6 +88,7 @@ function getIBMSwiftRepositories(callback) {
          });
 }
 
+// @param repositories - githubAPI repository
 function clone(repositories, workDirectory, callback) {
     function cloneRepository(repository, callback) {
         cloneRepositoryByURLAndName(repository.git_url, repository.name, workDirectory,
@@ -96,7 +96,7 @@ function clone(repositories, workDirectory, callback) {
                 if (error) {
                     return callback(error, null);
                 }
-                getDecoratedRepository(clonedRepository, repository, workDirectory, callback);
+                Repository.create(clonedRepository, repository, workDirectory, callback);
             });
     }
     async.map(repositories, cloneRepository, callback);
@@ -109,22 +109,6 @@ function cloneRepositoryByURLAndName(repositoryURL, repositoryName, workDirector
         console.log(`cloned repository ${clonedRepository.workdir()}`)
         callback(null, clonedRepository);
     }).catch(callback);
-}
-
-// @param repositories - githubAPI repository
-// @param callback callback(error, repository)
-
-function getDecoratedRepository(repository, githubAPIRepository, workDirectory, callback) {
-    gittags.latest(repository.workdir(), function(error, largestVersion) {
-        if (error) {
-            callback(error);
-        }
-        console.log(`last tag in ${githubAPIRepository.name} is ${largestVersion}`);
-        spmHandler.getPackageAsJSON(repository.workdir(), function(error, packageJSON) {
-            callback(error, new Repository(repository, githubAPIRepository,
-                                           largestVersion, packageJSON));
-        });
-    });
 }
 
 // @param repositories - decorated repositories (nodegit repository, githubAPI repository, largestVersion, packageJSON)
