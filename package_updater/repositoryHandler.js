@@ -91,13 +91,13 @@ function getIBMSwiftRepositories(callback) {
 function clone(repositories, workDirectory, callback) {
     function cloneRepository(repository, callback) {
         cloneRepositoryByURLAndName(repository.git_url, repository.name, workDirectory,
-                                    function(error, clonedRepository) {
-                                        if (error) {
-                                            return callback(error, null);
-                                        }
-                                        getRepositoryInfo(clonedRepository, repository.name, workDirectory,
-                                                          callback);
-                                    });
+            function(error, clonedRepository) {
+                if (error) {
+                    return callback(error, null);
+                }
+                getDecoratedRepository(clonedRepository, repository.name, workDirectory,
+                                       callback);
+            });
     }
     async.map(repositories, cloneRepository, callback);
 }
@@ -114,43 +114,77 @@ function cloneRepositoryByURLAndName(repositoryURL, repositoryName, workDirector
     });
 }
 
-function getRepositoryInfo(githubAPIRepository, repositoryName, workDirectory, callback) {
-    gittags.latest(githubAPIRepository.workdir(), function(error, largestVersion) {
+// @param repositories - githubAPI Repository
+// @param callback callback(error, decoratedRepositories)
+// decorated Repositories (githubAPI Repository, largestVersion, name, packageJSON)
+function getDecoratedRepository(repository, repositoryName, workDirectory, callback) {
+    gittags.latest(repository.workdir(), function(error, largestVersion) {
         if (error) {
             callback(error);
         }
         console.log(`last tag in ${repositoryName} is ${largestVersion}`);
-        spmHandler.getPackageAsJSON(githubAPIRepository.workdir(), function(error, packageJSON) {
-            callback(error, { repository: githubAPIRepository, name: repositoryName,
+        spmHandler.getPackageAsJSON(repository.workdir(), function(error, packageJSON) {
+            callback(error, { repository: repository, name: repositoryName,
                               largestVersion: largestVersion, packageJSON: packageJSON});
         });
     });
 }
 
+// @param repository - decorated repository (githubAPI Repository, largestVersion, name, packageJSON)
 function isKituraCoreRepository(repository) {
     return repository.name.startsWith('Kitura');
 }
 
-function calculateNewVersions(kituraVersion, decoratedRepositories, callback) {
-    console.log(`got ${decoratedRepositories.length} repositories, ${kituraVersion}`);
+// @param repositories - decorated repositories (githubAPI Repository, largestVersion, name, packageJSON)
+function calculateNewVersions(kituraVersion, repositories, callback) {
+    console.log(`got ${repositories.length} repositories, ${kituraVersion}`);
+    calculatedRepositoriesToBumpVersion(repositories,
+        function(error, repositoriesToBumpVersion) {
+            console.log(`${repositoriesToBumpVersion.length} repositories to bump version`);
+            callback(null, repositoriesToBumpVersion);
+        });
+}
 
-    async.filter(decoratedRepositories, function(decoratedRepository, filterCallback) {
-        wasRepositoryChangedAfterVersion(decoratedRepository.largestVersion,
-                                         decoratedRepository.repository,
-                                         filterCallback);
-    }, function(error, changedRepositories) {
-        console.log(`${changedRepositories.length} repositories were changed`);
-        callback(null);
+// @param repositories - decorated repositories (githubAPI Repository, largestVersion, name, packageJSON)
+function calculatedRepositoriesToBumpVersion(repositories, callback) {
+    getChangedRepositories(repositories, function(error, changedRepositories) {
+        const currentIterationChangedRepositories = changedRepositories;
+        const unchangedRepositories = repositories.filter(repository => changedRepositories.indexOf(repository) < 0);
+
+        console.log(`${changedRepositories.length} repositories were changed, ${unchangedRepositories.length} did not change`);
+
+
+        callback(null, changedRepositories);
     });
 }
 
-function wasRepositoryChangedAfterVersion(version, githubAPIRepository, callback) {
-    console.log(`checking if ${githubAPIRepository.workdir()} was changed after ${version}`);
-    getTagCommit(version, githubAPIRepository.workdir(), function(error, commitSHA) {
+// depender, dependee terms from https://en.wiktionary.org/wiki/dependee
+function getTransitiveClosureOfDependencies(repositoriesToCheck, dependeeRepositories) {
+    const currentIterationDependeeRepositories = dependeeRepositories;
+
+}
+
+// @param repositoriesToCheck - decorated repositories (githubAPI Repository, largestVersion, name, packageJSON)
+// @param dependeeRepositories - decorated repositories (githubAPI Repository, largestVersion, name, packageJSON)
+function getDependerRepositories(repositoriesToCheck, dependeeRepositories, callback) {
+
+}
+
+// @param repositoriesToCheck - decorated repositories (githubAPI Repository, largestVersion, name, packageJSON)
+function getChangedRepositories(repositories, callback) {
+    async.filter(repositories, function(repository, filterCallback) {
+        wasRepositoryChangedAfterVersion(repository.largestVersion, repository.repository,
+                                         filterCallback);
+    }, callback);
+}
+
+// @param githubAPI repository
+function wasRepositoryChangedAfterVersion(version, repository, callback) {
+    getTagCommit(version, repository.workdir(), function(error, commitSHA) {
         if (error) {
             return callback(error, false);
         }
-        githubAPIRepository.getHeadCommit().then(function(headCommit) {
+        repository.getHeadCommit().then(function(headCommit) {
             callback(null, !(commitSHA === headCommit.sha()));
         });
     });
