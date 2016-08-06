@@ -44,18 +44,10 @@ Parameters.prototype.read = function(callback) {
 }
 
 function getKituraVersion(readlineInterface, callback) {
-    const argv = process.argv;
-
-    var kituraVersion = "";
-
-    function readKituraVersion(callback) {
-        getParameter(readlineInterface, 2, 'Please enter Kitura version to set in format <major>.<minor>, e.g. 0.26',
-                     answer => { kituraVersion = answer;
-                                 callback(null);});
-    }
-
-    async.doUntil(readKituraVersion, () => /^(\d+)\.(\d+)$/.test(kituraVersion),
-                  () => callback(kituraVersion));
+    return getVerifiedParameter(readlineInterface, 2,
+                                    'Please enter Kitura version to set in format <major>.<minor>, e.g. 0.26',
+                                    kituraVersion => /^(\d+)\.(\d+)$/.test(kituraVersion),
+                                    callback);
 }
 
 function getSwiftVersion(readlineInterface, callback) {
@@ -71,4 +63,16 @@ function getParameter(readlineInterface, parameterNumber, question, callback) {
         readlineInterface.question(question + ' > ',
                                    answer => callback(answer.trim()));
     }
+}
+
+function getVerifiedParameter(readlineInterface, parameterNumber, question, verify, callback) {
+    var parameter = '';
+
+    function readParameter(callback) {
+        getParameter(readlineInterface, parameterNumber, question,
+                     answer => { parameter = answer;
+                                 callback(null);});
+    }
+
+    async.doUntil(readParameter, () => verify(parameter), () => callback(parameter));
 }
