@@ -136,7 +136,9 @@ function pushNewVersion(branchName, swiftVersion, versions, repository, callback
     console.log(`handling repository ${repository.githubAPIRepository.name}`);
     console.log(`\tbranch ${branchName} swiftVersion ${swiftVersion}`);
 
-    async.series([async.apply(spmHandler.updateDependencies, repository.repository.workdir(),
+    async.series([async.apply(createBranch, branchName, repository.repository),
+                  async.apply(spmHandler.updateDependencies,
+                              repository.repository.workdir(),
                               repository.packageJSON, versions)],
                  error => callback(error, repository));
 }
@@ -144,4 +146,12 @@ function pushNewVersion(branchName, swiftVersion, versions, repository, callback
 function submitPRs(branchName, repositories, callback) {
     versionHandler.logDecoratedRepositories(repositories, 'submiting PRs for repositories:');
     callback(null, 'done');
+}
+
+function createBranch(branchName, repository, callback) {
+    repository.getHeadCommit().then(function(commit) {
+        git.Branch.create(repository, branchName, commit, false).then(function(reference) {
+            repository.checkoutBranch(reference, new git.CheckoutOptions()).then(callback).catch(callback);
+        }).catch(callback);
+    }).catch(callback);
 }
