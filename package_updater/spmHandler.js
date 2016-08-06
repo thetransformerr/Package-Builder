@@ -40,15 +40,16 @@ function updateDependencies(repositoryDirectory, packageJSON, versions, callback
     console.log(`update dependencies in ${repositoryDirectory}`);
 
     if (packageJSON.dependencies.length == 0) {
-        return callback(null);
+        return callback(null, []);
     }
 
-    async.eachSeries(packageJSON.dependencies, function(dependency, callback) {
+    async.mapSeries(packageJSON.dependencies, function(dependency, callback) {
         const newVersion = versions[dependency.url];
         if (newVersion) {
-            return updateDependency(repositoryDirectory, dependency.url, newVersion, callback);
+            return updateDependency(repositoryDirectory, dependency.url, newVersion,
+                 error => callback(error, { dependencyURL: dependency.url, version: newVersion}));
         }
-        callback(null);
+        callback(null, null);
     }, callback);
 }
 
