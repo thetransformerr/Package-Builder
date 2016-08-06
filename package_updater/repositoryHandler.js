@@ -24,7 +24,6 @@ const git = require('nodegit');
 const untildify = require('untildify');
 const async = require('async');
 const gittags = require('git-tags');
-const simplegit = require('simple-git');
 const spmHandler = require( __dirname + '/spmHandler.js');
 const versionHandler = require( __dirname + '/versionHandler.js');
 const Repository = require( __dirname + '/repository.js');
@@ -173,16 +172,17 @@ function updatePackageDotSwift(repository, versions, branchReference, callback) 
             }
             updatedDependencies = updatedDependencies.filter(member => member);
             if (updatedDependencies.length > 0) {
-                return commitPackageDotSwift(repository.nodegitRepository.workdir(), updatedDependencies, branchReference, callback);
+                return commitPackageDotSwift(repository.simplegitRepository, updatedDependencies, branchReference, callback);
             }
             callback(null);
         });
 }
 
-function commitPackageDotSwift(repositoryDirectory, updatedDependencies, branchReference, callback) {
+// @param repository - simplegit repository
+function commitPackageDotSwift(repository, updatedDependencies, branchReference, callback) {
     var message = 'updated dependency versions in Package.swift';
     var detailsMessage = composeDetailsUpdatePackageDotSwiftCommitMessage(updatedDependencies);
-    simplegit(repositoryDirectory).commit(message, 'Package.swift', { '--message': detailsMessage}, callback);
+    repository.commit(message, 'Package.swift', { '--message': detailsMessage}, callback);
 }
 
 function composeDetailsUpdatePackageDotSwiftCommitMessage(updatedDependencies) {
