@@ -18,28 +18,31 @@ const async = require('async');
 const repositoryHandler = require( __dirname + '/repositoryHandler.js');
 const makeWorkDirectory = require( __dirname + '/makeWorkDirectory.js');
 const versionHandler = require( __dirname + '/versionHandler.js');
-const parameters = require( __dirname + '/parameters.js');
+const Parameters = require( __dirname + '/parameters.js');
 
-const swiftVersion = parameters.swiftVersion;
-const kituraVersion = parameters.kituraVersion;
-console.log(`setting Kitura Version to ${kituraVersion}`);
-console.log(`setting swift version to ${swiftVersion}`);
-const branchName = `automatic_migration_to_${kituraVersion}`;
+const parameters = new Parameters();
+var branchName = ""
+
+parameters.read(function() {
+    console.log(`setting Kitura Version to ${parameters.kituraVersion}`);
+    console.log(`setting swift version to ${parameters.swiftVersion}`);
+    branchName = `automatic_migration_to_${parameters.kituraVersion}`;
+
+    async.waterfall([setup,
+                     repositoryHandler.clone,
+                     async.apply(versionHandler.getNewVersions, parameters.kituraVersion),
+                     async.apply(repositoryHandler.pushNewVersions, branchName, parameters.swiftVersion),
+                     async.apply(repositoryHandler.submitPRs, branchName)],
+                    function(error, result) {
+                        if (error) {
+                            return console.error(`Error in updating repositories ${error}`);
+                        }
+                        console.log('Done');
+                    });
+});
 
 function setup(callback) {
     async.parallel({ workDirectory: makeWorkDirectory,
                      repositoriesToHandle: repositoryHandler.getRepositoriesToHandle
-    }, (error, results) =>  callback(error, results.repositoriesToHandle, results.workDirectory));
+                   }, (error, results) =>  callback(error, results.repositoriesToHandle, results.workDirectory));
 }
-
-async.waterfall([setup,
-                 repositoryHandler.clone,
-                 async.apply(versionHandler.getNewVersions, kituraVersion),
-                 async.apply(repositoryHandler.pushNewVersions, branchName, swiftVersion),
-                 async.apply(repositoryHandler.submitPRs, branchName)],
-                function(error, result) {
-                    if (error) {
-                        return console.error(`Error in updating repositories ${error}`);
-                    }
-                    console.log('Done');
-                 });

@@ -15,7 +15,16 @@
  **/
 
 
-module.exports = function() {
+module.exports = Parameters;
+
+function Parameters() {
+    this.swiftVersion = null;
+    this.kituraVersion = null;
+    this.pushWithoutPrompt = null;
+    this.submitPRsWithoutPrompt = null;
+}
+
+Parameters.prototype.read = function(callback) {
     const argv = process.argv
     const exit = process.exit
 
@@ -24,13 +33,13 @@ module.exports = function() {
         exit();
     }
 
-    const kituraVersion = argv[2]
-    const swiftVersion = argv[3]
+    this.kituraVersion = argv[2]
+    this.swiftVersion = argv[3]
 
-    if (!/^(\d+)\.(\d+)$/.test(kituraVersion)) {
+    if (!/^(\d+)\.(\d+)$/.test(this.kituraVersion)) {
         console.error('Kitura version parameter should be in the format <major>.<minor>');
         exit();
     }
 
-    return { swiftVersion: swiftVersion, kituraVersion: kituraVersion + ".0" }
-}();
+    callback();
+}
