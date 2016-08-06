@@ -39,7 +39,8 @@ Parameters.prototype.read = function(callback) {
 function getKituraVersion(callback) {
     return getVerifiedParameter(2,
         'Please enter Kitura version to set in format <major>.<minor>, e.g. 0.26',
-         kituraVersion => /^(\d+)\.(\d+)$/.test(kituraVersion), callback);
+        kituraVersion => /^(\d+)\.(\d+)$/.test(kituraVersion),
+        kituraVersion => callback(kituraVersion + '.0'));
 }
 
 function getSwiftVersion(callback) {
