@@ -189,14 +189,31 @@ function getChangedRepositories(repositories, callback) {
 
 // @param nodegit repository
 function wasRepositoryChangedAfterVersion(version, repository, callback) {
-    getTagCommit(version, repository.workdir(), function(error, commitSHA) {
+    getTagCommit(version, repository.workdir(), function(error, tagCommit) {
         if (error) {
             return callback(error, false);
         }
         repository.getHeadCommit().then(function(headCommit) {
-            callback(null, !(commitSHA === headCommit.sha()));
+            console.log(`${repository.workdir()}: ${version} ${tagCommit.sha} ${tagCommit.date}, head commit ${headCommit.sha()} ${headCommit.date()}`);
+            callback(null, isLaterCommit(headCommit, tagCommit));
         });
     });
+}
+
+// @param commit1 - nodegit commit
+// @param commit2 - gittools commit
+// returns true if the first commit is later than the second one
+function isLaterCommit(commit1, commit2) {
+    // there is an issue with handling annotated tags vs. lightweight tags -
+    //      the dates have different meaning
+    // for lightweight tags, commits should match if commit1 is not later than commit2,
+    //     but the dates could be nonmatching
+    // for annotated tags, commits will not match even if commit1 is not later than commit2,
+    //     so dates should be checked for annotated tags
+    if (commit1.sha() == commit2.sha) {
+        return false;
+    }
+    return commit1.date() > commit2.date;
 }
 
 function getTagCommit(tag, repositoryDirectory, callback) {
@@ -210,6 +227,6 @@ function getTagCommit(tag, repositoryDirectory, callback) {
             return callback(`no matching tags for ${version} in ${repositoryDirectory}`, null);
         }
         const matchingTag = matchingTags[0];
-        callback(error, matchingTag.sha);
+        callback(error, matchingTag);
     });
 }
