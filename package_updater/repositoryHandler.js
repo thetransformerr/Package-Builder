@@ -131,11 +131,16 @@ function getDecoratedRepository(repository, githubAPIRepository, workDirectory, 
 }
 
 function pushNewVersions(branchName, swiftVersion, repositories, versions, callback) {
-    console.log(`${Object.keys(versions).length} repositories to push:`);
-    Object.keys(versions).forEach(repository =>
-                                  console.log(`\t ${repository} ${versions[repository]}`));
-    callback(null, repositories);
+    async.map(repositories, async.apply(pushNewVersion, branchName, swiftVersion, versions),
+              callback);
+}
 
+function pushNewVersion(branchName, swiftVersion, versions, repository, callback) {
+    console.log(`handling repository ${repository.githubAPIRepository.name}`);
+    console.log(`\tbranch ${branchName} swiftVersion ${swiftVersion}`);
+
+    spmHandler.updateDependencies(repository.repository.workdir(), repository.packageJSON,
+                                  versions, (error) => callback(error, repository));
 }
 
 function submitPRs(branchName, repositories, callback) {
