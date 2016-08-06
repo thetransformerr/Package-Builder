@@ -14,9 +14,10 @@
  * limitations under the License.
  **/
 
+const async = require('async');
 const repositoryHandler = require( __dirname + '/repositoryHandler.js');
 const makeWorkDirectory = require( __dirname + '/makeWorkDirectory.js');
-const async = require('async');
+const versionHandler = require( __dirname + '/versionHandler.js');
 const parameters = require( __dirname + '/parameters.js');
 
 const swiftVersion = parameters.swiftVersion;
@@ -32,10 +33,11 @@ function setup(callback) {
 
 async.waterfall([setup,
                  repositoryHandler.clone,
-                 async.apply(repositoryHandler.getNewVersions, kituraVersion)],
-                 function(error, result) {
+                 async.apply(versionHandler.getNewVersions, kituraVersion),
+                 versionHandler.setVersions],
+                function(error, result) {
                     if (error) {
                         return console.error(`Error in updating repositories ${error}`);
                     }
-                    console.log('Finished');
+                    console.log('Done');
                  });
