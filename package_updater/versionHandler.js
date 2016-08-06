@@ -17,9 +17,9 @@
 
 module.exports = {getNewVersions: getNewVersions, logDecoratedRepositories: logDecoratedRepositories};
 
-const git = require("nodegit");
-const GittoolsRepository = require("git-tools");
-const semver = require("semver");
+const git = require('nodegit');
+const GittoolsRepository = require('git-tools');
+const semver = require('semver');
 const async = require('async');
 
 // @param repository - decorated repository (nodegit repository, githubAPI repository, largestVersion, packageJSON)
