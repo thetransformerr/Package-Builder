@@ -19,6 +19,7 @@ const repositoryHandler = require( __dirname + '/repositoryHandler.js');
 const makeWorkDirectory = require( __dirname + '/makeWorkDirectory.js');
 const versionHandler = require( __dirname + '/versionHandler.js');
 const Parameters = require( __dirname + '/parameters.js');
+const git = require("nodegit");
 
 const parameters = new Parameters();
 var branchName = ""
@@ -54,9 +55,16 @@ function getGoodByeMessage() {
 }
 
 function shouldPush(repositories, newVersions, callback) {
+    if (repositories.length < 1) {
+        return callback('No repositories were changed - nothing to push', null, null);
+    }
+
     console.log(`${Object.keys(newVersions).length} repositories to push:`);
     Object.keys(newVersions).forEach(repository =>
                                      console.log(`\t ${repository} ${newVersions[repository]}`));
+
+    var signature = git.Signature.default(repositories[0].repository);
+    console.log(`signature to be used: ${signature.name()} ${signature.email()}`);
 
     parameters.shouldPush(function(shouldPush) {
         if (shouldPush) {
