@@ -25,6 +25,7 @@ const untildify = require('untildify');
 const async = require('async');
 const gittags = require("git-tags");
 const GittoolsRepository = require("git-tools");
+const semver = require("semver");
 const spmHandler = require( __dirname + '/spmHandler.js');
 
 function getRepositoriesToHandle(callback) {
@@ -140,9 +141,24 @@ function getNewVersions(kituraVersion, repositories, callback) {
     logDecoratedRepositories(repositories, `calculate new versions for repositories below, kitura version ${kituraVersion}`);
     getRepositoriesToBumpVersion(repositories,
         function(error, repositoriesToBumpVersion) {
-            console.log(`${repositoriesToBumpVersion.length} repositories to bump version`);
-            callback(null, repositoriesToBumpVersion);
+            var newVersions = {};
+            repositoriesToBumpVersion.forEach(repository =>
+                newVersions[repository.githubAPIRepository.name] = getBumpedVersion(repository, kituraVersion));
+
+            console.log(`${Object.keys(newVersions).length} repositories to set versions:`);
+            Object.keys(newVersions).forEach(repository =>
+                 console.log(`\t ${repository} ${newVersions[repository]}`));
+
+            callback(null, repositoriesToBumpVersions, newVersions);
         });
+}
+
+// @param repository - decorated repository (nodegit repository, githubAPI repository, largestVersion, packageJSON)
+function getBumpedVersion(repository, kituraVersion) {
+    if (isKituraCoreRepository(repository)) {
+        return kituraVersion;
+    }
+    return semver.inc(repository.largestVersion, 'minor');
 }
 
 // @param repositories - decorated repositories (nodegit repository, githubAPI repository, largestVersion, packageJSON)
