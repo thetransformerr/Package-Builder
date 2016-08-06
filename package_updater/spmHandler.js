@@ -16,10 +16,11 @@
 
 module.exports = { getPackageAsJSON: getPackageAsJSON };
 
-const Exec = require('child_process').exec;
+const exec = require('child_process').exec;
+
 function getPackageAsJSON(repoDirectory, callback) {
     const swiftDumpPackageCommand = `swift package dump-package --input ${repoDirectory}/Package.swift`;
-    Exec(swiftDumpPackageCommand, function (error, stdout, stderr) {
+    exec(swiftDumpPackageCommand, function (error, stdout, stderr) {
         var packageJSON = null
         if (error) {
             callback(error, null);
