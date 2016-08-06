@@ -26,17 +26,13 @@ function getPackageAsJSON(repositoryDirectory, callback) {
     exec(swiftDumpPackageCommand, function (error, stdout, stderr) {
         var packageJSON = null
         if (error) {
-            callback(error, null);
-            return;
+            return callback(error, null);
         }
         if (stderr) {
             console.warn(stderr);
         }
 
-        packageJSON = JSON.parse(stdout);
-
-        console.log(`package name for ${repositoryDirectory} is ${packageJSON.name}`);
-        callback(null, packageJSON);
+        callback(null, JSON.parse(stdout));
     });
 }
 
