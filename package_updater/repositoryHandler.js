@@ -19,11 +19,12 @@ module.exports = {getRepositoriesToHandle: getRepositoriesToHandle, clone: clone
 
 const readline = require('readline');
 const fs = require('fs');
-const GithubAPI = require("github");
-const git = require("nodegit");
+const GithubAPI = require('github');
+const git = require('nodegit');
 const untildify = require('untildify');
 const async = require('async');
-const gittags = require("git-tags");
+const gittags = require('git-tags');
+const simplegit = require('simple-git');
 const spmHandler = require( __dirname + '/spmHandler.js');
 const versionHandler = require( __dirname + '/versionHandler.js');
 
@@ -127,31 +128,66 @@ function getDecoratedRepository(repository, githubAPIRepository, workDirectory, 
     });
 }
 
+// @param repositories - decorated repositories (nodegit repository, githubAPI repository, largestVersion, packageJSON)
 function pushNewVersions(branchName, swiftVersion, repositories, versions, callback) {
     async.map(repositories, async.apply(pushNewVersion, branchName, swiftVersion, versions),
               callback);
 }
 
+// @param repository - decorated repository (nodegit repository, githubAPI repository, largestVersion, packageJSON)
 function pushNewVersion(branchName, swiftVersion, versions, repository, callback) {
     console.log(`handling repository ${repository.githubAPIRepository.name}`);
     console.log(`\tbranch ${branchName} swiftVersion ${swiftVersion}`);
 
-    async.series([async.apply(createBranch, branchName, repository.repository),
-                  async.apply(spmHandler.updateDependencies,
-                              repository.repository.workdir(),
-                              repository.packageJSON, versions)],
-                 error => callback(error, repository));
+    async.waterfall([async.apply(createBranch, branchName, repository.repository),
+                     async.apply(updatePackageDotSwift, repository, versions)],
+                    error => callback(error, repository));
 }
 
+// @param repositories - decorated repositories (nodegit repository, githubAPI repository, largestVersion, packageJSON)
 function submitPRs(branchName, repositories, callback) {
     versionHandler.logDecoratedRepositories(repositories, 'submiting PRs for repositories:');
     callback(null, 'done');
 }
 
+// @param repository - nodegit repository
 function createBranch(branchName, repository, callback) {
     repository.getHeadCommit().then(function(commit) {
         git.Branch.create(repository, branchName, commit, false).then(function(reference) {
-            repository.checkoutBranch(reference, new git.CheckoutOptions()).then(callback).catch(callback);
+            repository.checkoutBranch(reference, new git.CheckoutOptions()).
+                then(() => callback(null,reference)).catch(callback);
         }).catch(callback);
     }).catch(callback);
+}
+
+// @param repository - decorated repository (nodegit repository, githubAPI repository, largestVersion, packageJSON)
+function updatePackageDotSwift(repository, versions, branchReference, callback) {
+    spmHandler.updateDependencies(repository.repository.workdir(), repository.packageJSON, versions,
+        function(error, updatedDependencies) {
+            if (error) {
+                return callback(error);
+            }
+            if (!updatedDependencies) {
+                return callback('no updatedDependencies returned from spmHandler.updateDependencies');
+            }
+            updatedDependencies = updatedDependencies.filter(member => member);
+            if (updatedDependencies.length > 0) {
+                return commitPackageDotSwift(repository.repository.workdir(), updatedDependencies, branchReference, callback);
+            }
+            callback(null);
+        });
+}
+
+// @param repository - nodegit repository
+function commitPackageDotSwift(repositoryDirectory, updatedDependencies, branchReference, callback) {
+    var message = 'updated dependency versions in Package.swift';
+    var detailsMessage = composeDetailsUpdatePackageDotSwiftCommitMessage(updatedDependencies);
+    console.log('detailsMessage = ' + detailsMessage);
+    simplegit(repositoryDirectory).commit(message, 'Package.swift', { '--message': detailsMessage}, callback);
+}
+
+function composeDetailsUpdatePackageDotSwiftCommitMessage(updatedDependencies) {
+    return updatedDependencies.reduce(function(message, dependency) {
+        return message + `changed version of ${dependency.dependencyURL} to ${dependency.version}\n`;
+    },"");
 }
