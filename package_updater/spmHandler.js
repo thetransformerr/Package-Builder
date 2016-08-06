@@ -18,8 +18,8 @@ module.exports = { getPackageAsJSON: getPackageAsJSON };
 
 const exec = require('child_process').exec;
 
-function getPackageAsJSON(repoDirectory, callback) {
-    const swiftDumpPackageCommand = `swift package dump-package --input ${repoDirectory}/Package.swift`;
+function getPackageAsJSON(repositoryDirectory, callback) {
+    const swiftDumpPackageCommand = `swift package dump-package --input ${repositoryDirectory}/Package.swift`;
     exec(swiftDumpPackageCommand, function (error, stdout, stderr) {
         var packageJSON = null
         if (error) {
@@ -32,7 +32,7 @@ function getPackageAsJSON(repoDirectory, callback) {
 
         packageJSON = JSON.parse(stdout);
 
-        console.log(`package name for ${repoDirectory} is ${packageJSON.name}`);
+        console.log(`package name for ${repositoryDirectory} is ${packageJSON.name}`);
         callback(null, packageJSON);
     });
 }
