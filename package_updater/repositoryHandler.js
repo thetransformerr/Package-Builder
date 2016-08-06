@@ -136,8 +136,9 @@ function pushNewVersion(branchName, swiftVersion, versions, repository, callback
     console.log(`handling repository ${repository.githubAPIRepository.name}`);
     console.log(`\tbranch ${branchName} swiftVersion ${swiftVersion}`);
 
-    spmHandler.updateDependencies(repository.repository.workdir(), repository.packageJSON,
-                                  versions, (error) => callback(error, repository));
+    async.series([async.apply(spmHandler.updateDependencies, repository.repository.workdir(),
+                              repository.packageJSON, versions)],
+                 error => callback(error, repository));
 }
 
 function submitPRs(branchName, repositories, callback) {
