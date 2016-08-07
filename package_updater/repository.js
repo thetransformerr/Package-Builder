@@ -37,6 +37,10 @@ Repository.prototype.directory = function() {
     return this.nodegitRepository.workdir();
 };
 
+Repository.prototype.clone_url = function() {
+    return this.nodegitRepository.clone_url();
+};
+
 Repository.log = function(repositories, title, doNotPrintEmpty) {
     if (repositories.length > 0) {
         console.log(title);
@@ -69,4 +73,16 @@ Repository.prototype.createBranch = function(branchName, callback) {
                 then(() => callback(null)).catch(callback);
         }).catch(callback);
     }).catch(callback);
+}
+
+Repository.prototype.push = function(branchName, callback) {
+    this.simplegitRepository.push('origin', branchName, callback);
+}
+
+Repository.prototype.pushTags = function(callback) {
+    this.simplegitRepository.pushTags('origin', callback);
+}
+
+Repository.prototype.addTag = function(tag,callback) {
+    this.simplegitRepository.addTag(tag, callback);
 }
