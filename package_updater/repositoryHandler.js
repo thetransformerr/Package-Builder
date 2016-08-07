@@ -148,7 +148,7 @@ function commitPackageDotSwift(repository, updatedDependencies, callback) {
 // @param repository - Repository
 function updatePackageDotSwift(repository, versions, callback) {
     'use strict';
-    spmHandler.updateDependencies(repository.nodegitRepository.workdir(), repository.packageJSON,
+    spmHandler.updateDependencies(repository.getDirectory(), repository.packageJSON,
         versions, (error, updatedDependencies) => {
             if (error) {
                 return callback(error);
