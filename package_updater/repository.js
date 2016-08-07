@@ -61,7 +61,6 @@ Repository.create = function(nodegitRepository, githubAPIRepository, workDirecto
     });
 };
 
-// @param repository - nodegit repository
 Repository.prototype.createBranch = function(branchName, callback) {
     const nodegitRepository = this.nodegitRepository;
     nodegitRepository.getHeadCommit().then(commit => {
