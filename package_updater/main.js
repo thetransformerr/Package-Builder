@@ -24,7 +24,7 @@ const Repository = require( __dirname + '/repository.js');
 const Parameters = require( __dirname + '/parameters.js');
 
 const parameters = new Parameters();
-var branchName = ""
+var branchName = "";
 
 parameters.read(() => {
     console.log(`setting Kitura Version to ${parameters.kituraVersion}`);

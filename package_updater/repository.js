@@ -73,16 +73,16 @@ Repository.prototype.createBranch = function(branchName, callback) {
                 then(() => callback(null)).catch(callback);
         }).catch(callback);
     }).catch(callback);
-}
+};
 
 Repository.prototype.push = function(branchName, callback) {
     this.simplegitRepository.push('origin', branchName, callback);
-}
+};
 
 Repository.prototype.pushTags = function(callback) {
     this.simplegitRepository.pushTags('origin', callback);
-}
+};
 
 Repository.prototype.addTag = function(tag,callback) {
     this.simplegitRepository.addTag(tag, callback);
-}
+};

@@ -18,7 +18,7 @@ module.exports = SwiftVersionHandler;
 
 const fs = require('fs');
 
-const SWIFT_VERSION_FILE = '.swift-version'
+const SWIFT_VERSION_FILE = '.swift-version';
 
 function SwiftVersionHandler(repository, swiftVersion) {
     this.swiftVersionPath = repository.directory() + SWIFT_VERSION_FILE;
@@ -42,7 +42,7 @@ SwiftVersionHandler.prototype.updateSwiftVersion = function(callback) {
             commitSwiftVersion(self.simplegitRepository, self.swiftVersion, callback);
         });
     });
-}
+};
 
 // @param repository - simplegit repository
 function commitSwiftVersion(repository, swiftVersion, callback) {

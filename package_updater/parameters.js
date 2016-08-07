@@ -34,7 +34,7 @@ Parameters.prototype.read = function(callback) {
             callback();
         });
     });
-}
+};
 
 function getKituraVersion(callback) {
     return getVerifiedParameter(2,
@@ -91,8 +91,8 @@ function getBooleanParameter(parameterNumber, question, callback) {
 
 Parameters.prototype.shouldPush = function(callback) {
     getBooleanParameter(4, 'Would you like to push the changes', callback);
-}
+};
 
 Parameters.prototype.shouldSubmitPRs = function(callback) {
     getBooleanParameter(5, 'Would you like to submit the PRs?', callback);
-}
+};

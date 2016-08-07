@@ -51,12 +51,12 @@ function getRepositoriesToUpdate(callback) {
     });
 
     repositoriesToUpdateReader.on('line', line => {
-        line = line.split('#')[0]
-        line = line.trim()
+        line = line.split('#')[0];
+        line = line.trim();
         if (!line) {
-            return
+            return;
         }
-        repositoriesToUpdate[line] = true
+        repositoriesToUpdate[line] = true;
     });
 
     repositoriesToUpdateReader.on('close', () => {
@@ -107,7 +107,7 @@ function cloneRepositoryByURLAndName(repositoryURL, repositoryName, workDirector
     console.log(`cloning repository ${repositoryName}`);
     const repositoryDirectory = workDirectory + '/' + repositoryName;
     git.Clone(repositoryURL, repositoryDirectory).then(clonedRepository => {
-        console.log(`cloned repository ${clonedRepository.workdir()}`)
+        console.log(`cloned repository ${clonedRepository.workdir()}`);
         callback(null, clonedRepository);
     }).catch(callback);
 }

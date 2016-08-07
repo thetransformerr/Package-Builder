@@ -18,8 +18,8 @@ const format = require('date-format');
 const fs = require('fs');
 
 module.exports = function(callback) {
-    const dateString = format.asString('MM_dd_yy', new Date())
-    const workDirectory = 'KituraPackagesToUpdate_' + dateString
+    const dateString = format.asString('MM_dd_yy', new Date());
+    const workDirectory = 'KituraPackagesToUpdate_' + dateString;
 
     fs.mkdir(workDirectory, error => callback(error, workDirectory));
-}
+};
