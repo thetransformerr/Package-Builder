@@ -14,13 +14,7 @@
  * limitations under the License.
  **/
 
-module.exports = Repository;
-
 const simplegit = require('simple-git');
-const gittags = require('git-tags');
-const spmHandler = require( __dirname + '/spmHandler.js');
-const git = require('nodegit');
-
 function Repository(nodegitRepository, githubAPIRepository, largestVersion, packageJSON) {
     'use strict';
 
@@ -30,6 +24,11 @@ function Repository(nodegitRepository, githubAPIRepository, largestVersion, pack
     this.largestVersion = largestVersion;
     this.packageJSON = packageJSON;
 }
+module.exports = Repository;
+
+const gittags = require('git-tags');
+const spmHandler = require( __dirname + '/spmHandler.js');
+const git = require('nodegit');
 
 Repository.prototype.name = function() {
     'use strict';

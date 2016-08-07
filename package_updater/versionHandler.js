@@ -15,7 +15,7 @@
  * limitations under the License.
  **/
 
-module.exports = {getNewVersions: getNewVersions};
+// module.exports defined at the bottom of the file
 
 const git = require('nodegit');
 const GittoolsRepository = require('git-tools');
@@ -29,21 +29,6 @@ function isKituraCoreRepository(repository) {
     return repository.githubAPIRepository.name.startsWith('Kitura');
 }
 
-// @param repositories - Repository
-function getNewVersions(kituraVersion, repositories, callback) {
-    'use strict';
-
-    Repository.log(repositories, `get new versions of repositories, version ${kituraVersion}`);
-    getRepositoriesToBumpVersion(repositories, (error, repositoriesToBumpVersion) => {
-        var newVersions = {};
-        repositoriesToBumpVersion.forEach(repository =>
-            newVersions[repository.githubAPIRepository.clone_url] =
-                getBumpedVersion(repository, kituraVersion));
-
-        callback(null, repositoriesToBumpVersion, newVersions);
-    });
-}
-
 // @param repository - Repository
 function getBumpedVersion(repository, kituraVersion) {
     'use strict';
@@ -53,92 +38,9 @@ function getBumpedVersion(repository, kituraVersion) {
     return semver.inc(repository.largestVersion, 'minor');
 }
 
-// @param repositories - Repository
-function getRepositoriesToBumpVersion(repositories, callback) {
-    'use strict';
-    getChangedRepositories(repositories, (error, changedRepositories) => {
-        if (error) {
-            callback(error, null, null);
-        }
-        Repository.log(changedRepositories, 'changed repositories');
-        const unchangedRepositories = subtractArray(repositories, changedRepositories);
-        Repository.log(unchangedRepositories, 'unchanged repositories');
-        callback(null, getTransitiveClosureOfDependencies(unchangedRepositories,
-                                                          changedRepositories));
-    });
-}
-
 function subtractArray(array1, array2) {
     'use strict';
     return array1.filter(member => array2.indexOf(member) < 0);
-}
-
-// dependee terms from https://en.wiktionary.org/wiki/dependee
-function getTransitiveClosureOfDependencies(repositoriesToCheck, dependeeRepositories) {
-    'use strict';
-    // we define that dependee repositories depened on themselves in a trivial way
-    var dependentRepositories = dependeeRepositories;
-    var currentDependeeRepositories = dependeeRepositories;
-    var currentRepositoriesToCheck = repositoriesToCheck;
-    var currentDependentRepositories = [];
-    var iteration = 0;
-    var maximalNumberOfIterations = repositoriesToCheck.length;
-
-    while (currentDependeeRepositories.length > 0 && iteration < maximalNumberOfIterations) {
-        console.log(`calculating transitive closure of dependencies iteration ${iteration++}`);
-
-        currentDependentRepositories =
-            getDependentRepositories(currentRepositoriesToCheck, currentDependeeRepositories);
-        Repository.log(currentDependentRepositories,
-                       'repositories that depend on changed repositories', true);
-
-        dependentRepositories = dependentRepositories.concat(currentDependentRepositories);
-        currentDependeeRepositories = currentDependentRepositories;
-        currentRepositoriesToCheck = subtractArray(currentRepositoriesToCheck,
-                                                   currentDependentRepositories);
-    }
-
-    return dependentRepositories;
-}
-
-// @param repositoriesToCheck - Repository
-// @param dependeeRepositories - Repository
-function getDependentRepositories(repositoriesToCheck, dependeeRepositories) {
-    'use strict';
-    return repositoriesToCheck.filter(repository =>
-        doesRepositoryDependOn(repository.packageJSON, dependeeRepositories));
-}
-
-// @param dependeeRepositories - Repository
-function doesRepositoryDependOn(packageJSON, dependeeRepositories) {
-    'use strict';
-    return packageJSON.dependencies.some(dependency =>
-        dependeeRepositories.some(dependeeRepository =>
-            dependeeRepository.githubAPIRepository.clone_url === dependency.url));
-}
-
-// @param repositoriesToCheck - Repository
-function getChangedRepositories(repositories, callback) {
-    'use strict';
-    async.filter(repositories, (repository, filterCallback) => {
-        wasRepositoryChangedAfterVersion(repository.largestVersion,
-            repository.nodegitRepository, filterCallback);
-    }, callback);
-}
-
-// @param repository - nodegit repository
-function wasRepositoryChangedAfterVersion(version, repository, callback) {
-    'use strict';
-    getTagCommit(version, repository.workdir(), (error, tagCommit) => {
-        if (error) {
-            return callback(error, false);
-        }
-        repository.getHeadCommit().then(headCommit => {
-            console.log(`${repository.workdir()}: ${version} ${tagCommit.sha} ${tagCommit.date},` +
-                        ` head commit ${headCommit.sha()} ${headCommit.date()}`);
-            callback(null, isLaterCommit(headCommit, tagCommit));
-        });
-    });
 }
 
 // @param commit1 - nodegit commit
@@ -174,3 +76,103 @@ function getTagCommit(tag, repositoryDirectory, callback) {
         callback(error, matchingTag);
     });
 }
+
+// @param repository - nodegit repository
+function wasRepositoryChangedAfterVersion(version, repository, callback) {
+    'use strict';
+    getTagCommit(version, repository.workdir(), (error, tagCommit) => {
+        if (error) {
+            return callback(error, false);
+        }
+        repository.getHeadCommit().then(headCommit => {
+            console.log(`${repository.workdir()}: ${version} ${tagCommit.sha} ${tagCommit.date},` +
+                        ` head commit ${headCommit.sha()} ${headCommit.date()}`);
+            callback(null, isLaterCommit(headCommit, tagCommit));
+        });
+    });
+}
+
+// @param dependeeRepositories - Repository
+function doesRepositoryDependOn(packageJSON, dependeeRepositories) {
+    'use strict';
+    return packageJSON.dependencies.some(dependency =>
+        dependeeRepositories.some(dependeeRepository =>
+            dependeeRepository.githubAPIRepository.clone_url === dependency.url));
+}
+
+// @param repositoriesToCheck - Repository
+// @param dependeeRepositories - Repository
+function getDependentRepositories(repositoriesToCheck, dependeeRepositories) {
+    'use strict';
+    return repositoriesToCheck.filter(repository =>
+        doesRepositoryDependOn(repository.packageJSON, dependeeRepositories));
+}
+
+// @param repositoriesToCheck - Repository
+function getChangedRepositories(repositories, callback) {
+    'use strict';
+    async.filter(repositories, (repository, filterCallback) => {
+        wasRepositoryChangedAfterVersion(repository.largestVersion,
+            repository.nodegitRepository, filterCallback);
+    }, callback);
+}
+
+// dependee terms from https://en.wiktionary.org/wiki/dependee
+function getTransitiveClosureOfDependencies(repositoriesToCheck, dependeeRepositories) {
+    'use strict';
+    // we define that dependee repositories depened on themselves in a trivial way
+    var dependentRepositories = dependeeRepositories;
+    var currentDependeeRepositories = dependeeRepositories;
+    var currentRepositoriesToCheck = repositoriesToCheck;
+    var currentDependentRepositories = [];
+    var iteration = 0;
+    var maximalNumberOfIterations = repositoriesToCheck.length;
+
+    while (currentDependeeRepositories.length > 0 && iteration < maximalNumberOfIterations) {
+        console.log(`calculating transitive closure of dependencies iteration ${iteration++}`);
+
+        currentDependentRepositories =
+            getDependentRepositories(currentRepositoriesToCheck, currentDependeeRepositories);
+        Repository.log(currentDependentRepositories,
+                       'repositories that depend on changed repositories', true);
+
+        dependentRepositories = dependentRepositories.concat(currentDependentRepositories);
+        currentDependeeRepositories = currentDependentRepositories;
+        currentRepositoriesToCheck = subtractArray(currentRepositoriesToCheck,
+                                                   currentDependentRepositories);
+    }
+
+    return dependentRepositories;
+}
+
+// @param repositories - Repository
+function getRepositoriesToBumpVersion(repositories, callback) {
+    'use strict';
+    getChangedRepositories(repositories, (error, changedRepositories) => {
+        if (error) {
+            callback(error, null, null);
+        }
+        Repository.log(changedRepositories, 'changed repositories');
+        const unchangedRepositories = subtractArray(repositories, changedRepositories);
+        Repository.log(unchangedRepositories, 'unchanged repositories');
+        callback(null, getTransitiveClosureOfDependencies(unchangedRepositories,
+                                                          changedRepositories));
+    });
+}
+
+// @param repositories - Repository
+function getNewVersions(kituraVersion, repositories, callback) {
+    'use strict';
+
+    Repository.log(repositories, `get new versions of repositories, version ${kituraVersion}`);
+    getRepositoriesToBumpVersion(repositories, (error, repositoriesToBumpVersion) => {
+        var newVersions = {};
+        repositoriesToBumpVersion.forEach(repository =>
+            newVersions[repository.githubAPIRepository.clone_url] =
+                getBumpedVersion(repository, kituraVersion));
+
+        callback(null, repositoriesToBumpVersion, newVersions);
+    });
+}
+
+module.exports = {getNewVersions: getNewVersions};

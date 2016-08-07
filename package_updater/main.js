@@ -26,28 +26,6 @@ const Parameters = require( __dirname + '/parameters.js');
 const parameters = new Parameters();
 var branchName = "";
 
-parameters.read(() => {
-    'use strict';
-    console.log(`setting Kitura Version to ${parameters.kituraVersion}`);
-    console.log(`setting swift version to ${parameters.swiftVersion}`);
-    branchName = `automatic_migration_to_${parameters.kituraVersion}`;
-
-    async.waterfall([setup,
-                     repositoryHandler.clone,
-                     async.apply(versionHandler.getNewVersions, parameters.kituraVersion),
-                     shouldPush,
-                     async.apply(repositoryHandler.pushNewVersions, branchName,
-                                 parameters.swiftVersion),
-                     shouldSubmitPRs,
-                     async.apply(repositoryHandler.submitPRs, branchName)],
-                    (error, result) => {
-                        if (error) {
-                            return console.log(error);
-                        }
-                        console.log(getGoodByeMessage());
-                    });
-});
-
 function setup(callback) {
     'use strict';
     async.parallel({ workDirectory: makeWorkDirectory,
@@ -94,3 +72,25 @@ function shouldSubmitPRs(repositories, callback) {
         }
     });
 }
+
+parameters.read(() => {
+    'use strict';
+    console.log(`setting Kitura Version to ${parameters.kituraVersion}`);
+    console.log(`setting swift version to ${parameters.swiftVersion}`);
+    branchName = `automatic_migration_to_${parameters.kituraVersion}`;
+
+    async.waterfall([setup,
+                     repositoryHandler.clone,
+                     async.apply(versionHandler.getNewVersions, parameters.kituraVersion),
+                     shouldPush,
+                     async.apply(repositoryHandler.pushNewVersions, branchName,
+                                 parameters.swiftVersion),
+                     shouldSubmitPRs,
+                     async.apply(repositoryHandler.submitPRs, branchName)],
+                    error => {
+                        if (error) {
+                            return console.log(error);
+                        }
+                        console.log(getGoodByeMessage());
+                    });
+});

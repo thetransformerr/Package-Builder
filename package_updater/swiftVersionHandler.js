@@ -14,10 +14,6 @@
  * limitations under the License.
  **/
 
-module.exports = SwiftVersionHandler;
-
-const fs = require('fs');
-
 const SWIFT_VERSION_FILE = '.swift-version';
 
 function SwiftVersionHandler(repository, swiftVersion) {
@@ -28,25 +24,9 @@ function SwiftVersionHandler(repository, swiftVersion) {
     this.simplegitRepository = repository.simplegitRepository;
 }
 
-SwiftVersionHandler.prototype.updateSwiftVersion = function(callback) {
-    'use strict';
+module.exports = SwiftVersionHandler;
 
-    const self = this;
-    readSwiftVersion(self.swiftVersionPath, (error, currentSwiftVersion) => {
-        if (error) {
-            callback(error);
-        }
-        if (self.swiftVersion === currentSwiftVersion) {
-            return callback(null);
-        }
-        writeSwiftVersion(self.swiftVersionPath, self.swiftVersion, error => {
-            if (error) {
-                callback(error);
-            }
-            commitSwiftVersion(self.simplegitRepository, self.swiftVersion, callback);
-        });
-    });
-};
+const fs = require('fs');
 
 // @param repository - simplegit repository
 function commitSwiftVersion(repository, swiftVersion, callback) {
@@ -80,3 +60,23 @@ function writeSwiftVersion(swiftVersionPath, swiftVersion, callback) {
         callback(null);
     });
 }
+
+SwiftVersionHandler.prototype.updateSwiftVersion = function(callback) {
+    'use strict';
+
+    const self = this;
+    readSwiftVersion(self.swiftVersionPath, (error, currentSwiftVersion) => {
+        if (error) {
+            callback(error);
+        }
+        if (self.swiftVersion === currentSwiftVersion) {
+            return callback(null);
+        }
+        writeSwiftVersion(self.swiftVersionPath, self.swiftVersion, error => {
+            if (error) {
+                callback(error);
+            }
+            commitSwiftVersion(self.simplegitRepository, self.swiftVersion, callback);
+        });
+    });
+};

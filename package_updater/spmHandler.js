@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-module.exports = {getPackageAsJSON: getPackageAsJSON, updateDependencies: updateDependencies};
+// module.exports defined at the bottom of the file
 
 const exec = require('child_process').exec;
 const async = require('async');
@@ -40,23 +40,27 @@ function getPackageAsJSON(repositoryDirectory, callback) {
     });
 }
 
-function updateDependencies(repositoryDirectory, packageJSON, versions, callback) {
+function hasDependencyWithVersions(packageJSON, dependencyURL, version) {
+    'use strict';
+    return packageJSON.dependencies.some(dependency =>
+        dependency.url === dependencyURL && dependency.version.lowerBound === version);
+}
+
+function verifyThePackageWasUpdated(repositoryDirectory, dependencyURL, version, callback) {
     'use strict';
 
-    console.log(`update dependencies in ${repositoryDirectory}`);
-
-    if (packageJSON.dependencies.length === 0) {
-        return callback(null, []);
-    }
-
-    async.mapSeries(packageJSON.dependencies, (dependency, callback) => {
-        const newVersion = versions[dependency.url];
-        if (newVersion) {
-            return updateDependency(repositoryDirectory, dependency.url, newVersion,
-                 error => callback(error, { dependencyURL: dependency.url, version: newVersion}));
+    getPackageAsJSON(repositoryDirectory, (error, packageJSON) => {
+        if (error) {
+            callback(error);
         }
-        callback(null, null);
-    }, callback);
+        if (hasDependencyWithVersions(packageJSON, dependencyURL, version)) {
+            callback(null);
+        } else {
+            callback(`Did not manage to update Package.swift in ${repositoryDirectory}.\n` +
+                'Verify that the dependency is in format .Package(url: <https url>,' +
+                '  majorVersion: <major>, minor: <minor>), exactly without redundant whitespace.');
+        }
+    });
 }
 
 function updateDependency(repositoryDirectory, dependencyURL, version, callback) {
@@ -80,25 +84,23 @@ function updateDependency(repositoryDirectory, dependencyURL, version, callback)
     verifyThePackageWasUpdated(repositoryDirectory, dependencyURL, version, callback);
 }
 
-function verifyThePackageWasUpdated(repositoryDirectory, dependencyURL, version, callback) {
+function updateDependencies(repositoryDirectory, packageJSON, versions, callback) {
     'use strict';
 
-    getPackageAsJSON(repositoryDirectory, (error, packageJSON) => {
-        if (error) {
-            callback(error);
+    console.log(`update dependencies in ${repositoryDirectory}`);
+
+    if (packageJSON.dependencies.length === 0) {
+        return callback(null, []);
+    }
+
+    async.mapSeries(packageJSON.dependencies, (dependency, callback) => {
+        const newVersion = versions[dependency.url];
+        if (newVersion) {
+            return updateDependency(repositoryDirectory, dependency.url, newVersion,
+                 error => callback(error, { dependencyURL: dependency.url, version: newVersion}));
         }
-        if (hasDependencyWithVersions(packageJSON, dependencyURL, version)) {
-            callback(null);
-        } else {
-            callback(`Did not manage to update Package.swift in ${repositoryDirectory}.\n` +
-                'Verify that the dependency is in format .Package(url: <https url>,' +
-                '  majorVersion: <major>, minor: <minor>), exactly without redundant whitespace.');
-        }
-    });
+        callback(null, null);
+    }, callback);
 }
 
-function hasDependencyWithVersions(packageJSON, dependencyURL, version) {
-    'use strict';
-    return packageJSON.dependencies.some(dependency =>
-        dependency.url === dependencyURL && dependency.version.lowerBound === version);
-}
+module.exports = {getPackageAsJSON: getPackageAsJSON, updateDependencies: updateDependencies};
