@@ -17,7 +17,6 @@
 
 // module.exports defined at the bottom of the file
 
-const git = require('nodegit');
 const GittoolsRepository = require('git-tools');
 const semver = require('semver');
 const async = require('async');
