@@ -17,7 +17,6 @@
 
 // module.exports defined at the bottom of the file
 
-const GittoolsRepository = require('git-tools');
 const semver = require('semver');
 const async = require('async');
 const Repository = require( __dirname + '/repository.js');
@@ -42,55 +41,6 @@ function subtractArray(array1, array2) {
     return array1.filter(member => array2.indexOf(member) < 0);
 }
 
-// @param commit1 - nodegit commit
-// @param commit2 - gittools commit
-// returns true if the first commit is later than the second one
-function isLaterCommit(commit1, commit2) {
-    'use strict';
-    // there is an issue with handling annotated tags vs. lightweight tags -
-    //      the dates have different meaning
-    // for lightweight tags, commits should match if commit1 is not later than commit2,
-    //     but the dates could be nonmatching
-    // for annotated tags, commits will not match even if commit1 is not later than commit2,
-    //     so dates should be checked for annotated tags
-    if (commit1.sha() === commit2.sha) {
-        return false;
-    }
-    return commit1.date() > commit2.date;
-}
-
-function getTagCommit(tag, repositoryDirectory, callback) {
-    'use strict';
-
-    const gittoolsRepository = new GittoolsRepository(repositoryDirectory);
-    gittoolsRepository.tags((error, tags) => {
-        if (error) {
-            return callback(error, null);
-        }
-        const matchingTags = tags.filter(tagToFilter => tagToFilter.name === tag);
-        if (matchingTags.length !== 1) {
-            return callback(`no matching tags for ${version} in ${repositoryDirectory}`, null);
-        }
-        const matchingTag = matchingTags[0];
-        callback(error, matchingTag);
-    });
-}
-
-// @param repository - nodegit repository
-function wasRepositoryChangedAfterVersion(version, repository, callback) {
-    'use strict';
-    getTagCommit(version, repository.workdir(), (error, tagCommit) => {
-        if (error) {
-            return callback(error, false);
-        }
-        repository.getHeadCommit().then(headCommit => {
-            console.log(`${repository.workdir()}: ${version} ${tagCommit.sha} ${tagCommit.date},` +
-                        ` head commit ${headCommit.sha()} ${headCommit.date()}`);
-            callback(null, isLaterCommit(headCommit, tagCommit));
-        });
-    });
-}
-
 // @param dependeeRepositories - Repository
 function doesRepositoryDependOn(packageJSON, dependeeRepositories) {
     'use strict';
@@ -111,8 +61,7 @@ function getDependentRepositories(repositoriesToCheck, dependeeRepositories) {
 function getChangedRepositories(repositories, callback) {
     'use strict';
     async.filter(repositories, (repository, filterCallback) => {
-        wasRepositoryChangedAfterVersion(repository.largestVersion,
-            repository.nodegitRepository, filterCallback);
+        repository.wasChangedAfterVersion(repository.largestVersion, filterCallback);
     }, callback);
 }
 

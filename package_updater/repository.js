@@ -29,6 +29,7 @@ module.exports = Repository;
 const gittags = require('git-tags');
 const spmHandler = require( __dirname + '/spmHandler.js');
 const git = require('nodegit');
+const GittoolsRepository = require('git-tools');
 
 Repository.prototype.getName = function() {
     'use strict';
@@ -99,3 +100,55 @@ Repository.prototype.addTag = function(tag,callback) {
     'use strict';
     this.simplegitRepository.addTag(tag, callback);
 };
+
+
+// @param commit1 - nodegit commit
+// @param commit2 - gittools commit
+// returns true if the first commit is later than the second one
+function isLaterCommit(commit1, commit2) {
+    'use strict';
+    // there is an issue with handling annotated tags vs. lightweight tags -
+    //      the dates have different meaning
+    // for lightweight tags, commits should match if commit1 is not later than commit2,
+    //     but the dates could be nonmatching
+    // for annotated tags, commits will not match even if commit1 is not later than commit2,
+    //     so dates should be checked for annotated tags
+    if (commit1.sha() === commit2.sha) {
+        return false;
+    }
+    return commit1.date() > commit2.date;
+}
+
+function getTagCommit(tag, repositoryDirectory, callback) {
+    'use strict';
+
+    const gittoolsRepository = new GittoolsRepository(repositoryDirectory);
+    gittoolsRepository.tags((error, tags) => {
+        if (error) {
+            return callback(error, null);
+        }
+        const matchingTags = tags.filter(tagToFilter => tagToFilter.name === tag);
+        if (matchingTags.length !== 1) {
+            return callback(`no matching tags for ${version} in ${repositoryDirectory}`, null);
+        }
+        const matchingTag = matchingTags[0];
+        callback(error, matchingTag);
+    });
+}
+
+// @param repository - nodegit repository
+Repository.prototype.wasChangedAfterVersion = function(version, callback) {
+    'use strict';
+
+    const self = this;
+    getTagCommit(version, self.getDirectory(), (error, tagCommit) => {
+        if (error) {
+            return callback(error, false);
+        }
+        self.nodegitRepository.getHeadCommit().then(headCommit => {
+            console.log(`${self.getName()}: ${version} ${tagCommit.sha} ${tagCommit.date},` +
+                        ` head commit ${headCommit.sha()} ${headCommit.date()}`);
+            callback(null, isLaterCommit(headCommit, tagCommit));
+        });
+    });
+}
