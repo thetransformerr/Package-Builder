@@ -53,7 +53,7 @@ function isLaterCommit(commit1, commit2) {
     //     but the dates could be nonmatching
     // for annotated tags, commits will not match even if commit1 is not later than commit2,
     //     so dates should be checked for annotated tags
-    if (commit1.sha() == commit2.sha) {
+    if (commit1.sha() === commit2.sha) {
         return false;
     }
     return commit1.date() > commit2.date;
@@ -67,8 +67,8 @@ function getTagCommit(tag, repositoryDirectory, callback) {
         if (error) {
             return callback(error, null);
         }
-        const matchingTags = tags.filter(tagToFilter => tagToFilter.name == tag);
-        if (matchingTags.length != 1) {
+        const matchingTags = tags.filter(tagToFilter => tagToFilter.name === tag);
+        if (matchingTags.length !== 1) {
             return callback(`no matching tags for ${version} in ${repositoryDirectory}`, null);
         }
         const matchingTag = matchingTags[0];
