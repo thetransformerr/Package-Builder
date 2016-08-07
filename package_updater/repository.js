@@ -101,6 +101,12 @@ Repository.prototype.addTag = function(tag,callback) {
     this.simplegitRepository.addTag(tag, callback);
 };
 
+Repository.prototype.getCredentials = function() {
+    'use strict';
+
+    var signature = git.Signature.default(this.nodegitRepository);
+    return {name: signature.name(), email: signature.email()};
+};
 
 // @param commit1 - nodegit commit
 // @param commit2 - gittools commit
@@ -151,4 +157,4 @@ Repository.prototype.wasChangedAfterVersion = function(version, callback) {
             callback(null, isLaterCommit(headCommit, tagCommit));
         });
     });
-}
+};

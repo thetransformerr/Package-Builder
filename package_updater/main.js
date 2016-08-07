@@ -18,7 +18,6 @@ const async = require('async');
 const repositoryHandler = require( __dirname + '/repositoryHandler.js');
 const makeWorkDirectory = require( __dirname + '/makeWorkDirectory.js');
 const versionHandler = require( __dirname + '/versionHandler.js');
-const git = require("nodegit");
 
 const Repository = require( __dirname + '/repository.js');
 const Parameters = require( __dirname + '/parameters.js');
@@ -49,8 +48,8 @@ function shouldPush(repositories, newVersions, callback) {
     Object.keys(newVersions).forEach(repository =>
                                      console.log(`\t ${repository} ${newVersions[repository]}`));
 
-    var signature = git.Signature.default(repositories[0].nodegitRepository);
-    console.log(`signature to be used: ${signature.name()} ${signature.email()}`);
+    var credentials = repositories[0].getCredentials();
+    console.log(`credentials to be used: ${credentials.name} ${credentials.email}`);
 
     parameters.shouldPush(shouldPush => {
         if (shouldPush) {
