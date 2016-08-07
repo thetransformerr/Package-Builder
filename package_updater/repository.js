@@ -19,6 +19,7 @@ module.exports = Repository;
 const simplegit = require('simple-git');
 const gittags = require('git-tags');
 const spmHandler = require( __dirname + '/spmHandler.js');
+const git = require('nodegit');
 
 function Repository(nodegitRepository, githubAPIRepository, largestVersion, packageJSON) {
     this.nodegitRepository = nodegitRepository;
@@ -59,3 +60,14 @@ Repository.create = function(nodegitRepository, githubAPIRepository, workDirecto
         });
     });
 };
+
+// @param repository - nodegit repository
+Repository.prototype.createBranch = function(branchName, callback) {
+    const nodegitRepository = this.nodegitRepository;
+    nodegitRepository.getHeadCommit().then(function(commit) {
+        git.Branch.create(nodegitRepository, branchName, commit, false).then(function(reference) {
+            nodegitRepository.checkoutBranch(reference, new git.CheckoutOptions()).
+                then(() => callback(null)).catch(callback);
+        }).catch(callback);
+    }).catch(callback);
+}

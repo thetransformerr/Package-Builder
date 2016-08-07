@@ -126,7 +126,9 @@ function pushNewVersion(branchName, swiftVersion, versions, repository, callback
     const swiftVersionHandler = new SwiftVersionHandler(repository, swiftVersion);
     const updateSwiftVersion = swiftVersionHandler.updateSwiftVersion.bind(swiftVersionHandler);
 
-    async.series([async.apply(createBranch, branchName, repository.nodegitRepository),
+    const createBranch = repository.createBranch.bind(repository);
+
+    async.series([async.apply(createBranch, branchName),
                   async.apply(updatePackageDotSwift, repository, versions),
                   updateSwiftVersion],
                  error => callback(error, repository));
@@ -136,16 +138,6 @@ function pushNewVersion(branchName, swiftVersion, versions, repository, callback
 function submitPRs(branchName, repositories, callback) {
     Repository.log(repositories, 'submiting PRs for repositories:');
     callback(null, 'done');
-}
-
-// @param repository - nodegit repository
-function createBranch(branchName, repository, callback) {
-    repository.getHeadCommit().then(function(commit) {
-        git.Branch.create(repository, branchName, commit, false).then(function(reference) {
-            repository.checkoutBranch(reference, new git.CheckoutOptions()).
-                then(() => callback(null)).catch(callback);
-        }).catch(callback);
-    }).catch(callback);
 }
 
 // @param repository - Repository
