@@ -81,4 +81,4 @@ function pushNewVersions(branchName, swiftVersion, repositories, versions, callb
               callback);
 }
 
-module.exports = {pushNewVersions: pushNewVersions};
+module.exports = pushNewVersions;

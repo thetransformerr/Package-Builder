@@ -15,15 +15,18 @@
  **/
 
 const async = require('async');
-const repositoryHandler = require( __dirname + '/repositoryHandler.js');
+
 const makeWorkDirectory = require( __dirname + '/makeWorkDirectory.js');
-const versionHandler = require( __dirname + '/versionHandler.js');
 const getRepositoriesToHandle = require( __dirname + '/getRepositoriesToHandle.js');
-const clone = require( __dirname + '/clone.js');
-const submitPRs = require( __dirname + '/submitPRs.js');
 
 const Repository = require( __dirname + '/repository.js');
 const Parameters = require( __dirname + '/parameters.js');
+const versionHandler = require( __dirname + '/versionHandler.js');
+
+
+const clone = require( __dirname + '/clone.js');
+const pushNewVersions = require( __dirname + '/pushNewVersions.js');
+const submitPRs = require( __dirname + '/submitPRs.js');
 
 const parameters = new Parameters();
 var branchName = "";
@@ -85,7 +88,7 @@ parameters.read(() => {
                      clone,
                      async.apply(versionHandler.getNewVersions, parameters.kituraVersion),
                      shouldPush,
-                     async.apply(repositoryHandler.pushNewVersions, branchName,
+                     async.apply(pushNewVersions, branchName,
                                  parameters.swiftVersion),
                      shouldSubmitPRs,
                      async.apply(submitPRs, branchName)],
