@@ -25,11 +25,14 @@ const Repository = require( __dirname + '/repository.js');
 
 // @param repository - Repository
 function isKituraCoreRepository(repository) {
+    'use strict';
     return repository.githubAPIRepository.name.startsWith('Kitura');
 }
 
 // @param repositories - Repository
 function getNewVersions(kituraVersion, repositories, callback) {
+    'use strict';
+
     Repository.log(repositories, `get new versions of repositories, version ${kituraVersion}`);
     getRepositoriesToBumpVersion(repositories, (error, repositoriesToBumpVersion) => {
         var newVersions = {};
@@ -43,6 +46,7 @@ function getNewVersions(kituraVersion, repositories, callback) {
 
 // @param repository - Repository
 function getBumpedVersion(repository, kituraVersion) {
+    'use strict';
     if (isKituraCoreRepository(repository)) {
         return kituraVersion;
     }
@@ -51,6 +55,7 @@ function getBumpedVersion(repository, kituraVersion) {
 
 // @param repositories - Repository
 function getRepositoriesToBumpVersion(repositories, callback) {
+    'use strict';
     getChangedRepositories(repositories, (error, changedRepositories) => {
         if (error) {
             callback(error, null, null);
@@ -64,16 +69,18 @@ function getRepositoriesToBumpVersion(repositories, callback) {
 }
 
 function subtractArray(array1, array2) {
+    'use strict';
     return array1.filter(member => array2.indexOf(member) < 0);
 }
 
 // dependee terms from https://en.wiktionary.org/wiki/dependee
 function getTransitiveClosureOfDependencies(repositoriesToCheck, dependeeRepositories) {
+    'use strict';
     // we define that dependee repositories depened on themselves in a trivial way
     var dependentRepositories = dependeeRepositories;
     var currentDependeeRepositories = dependeeRepositories;
     var currentRepositoriesToCheck = repositoriesToCheck;
-    var currentDependetRepositories = [];
+    var currentDependentRepositories = [];
     var iteration = 0;
     var maximalNumberOfIterations = repositoriesToCheck.length;
 
@@ -97,12 +104,14 @@ function getTransitiveClosureOfDependencies(repositoriesToCheck, dependeeReposit
 // @param repositoriesToCheck - Repository
 // @param dependeeRepositories - Repository
 function getDependentRepositories(repositoriesToCheck, dependeeRepositories) {
+    'use strict';
     return repositoriesToCheck.filter(repository =>
         doesRepositoryDependOn(repository.packageJSON, dependeeRepositories));
 }
 
 // @param dependeeRepositories - Repository
 function doesRepositoryDependOn(packageJSON, dependeeRepositories) {
+    'use strict';
     return packageJSON.dependencies.some(dependency =>
         dependeeRepositories.some(dependeeRepository =>
             dependeeRepository.githubAPIRepository.clone_url === dependency.url));
@@ -110,6 +119,7 @@ function doesRepositoryDependOn(packageJSON, dependeeRepositories) {
 
 // @param repositoriesToCheck - Repository
 function getChangedRepositories(repositories, callback) {
+    'use strict';
     async.filter(repositories, (repository, filterCallback) => {
         wasRepositoryChangedAfterVersion(repository.largestVersion,
             repository.nodegitRepository, filterCallback);
@@ -118,6 +128,7 @@ function getChangedRepositories(repositories, callback) {
 
 // @param repository - nodegit repository
 function wasRepositoryChangedAfterVersion(version, repository, callback) {
+    'use strict';
     getTagCommit(version, repository.workdir(), (error, tagCommit) => {
         if (error) {
             return callback(error, false);
@@ -134,6 +145,7 @@ function wasRepositoryChangedAfterVersion(version, repository, callback) {
 // @param commit2 - gittools commit
 // returns true if the first commit is later than the second one
 function isLaterCommit(commit1, commit2) {
+    'use strict';
     // there is an issue with handling annotated tags vs. lightweight tags -
     //      the dates have different meaning
     // for lightweight tags, commits should match if commit1 is not later than commit2,
@@ -147,6 +159,8 @@ function isLaterCommit(commit1, commit2) {
 }
 
 function getTagCommit(tag, repositoryDirectory, callback) {
+    'use strict';
+
     const gittoolsRepository = new GittoolsRepository(repositoryDirectory);
     gittoolsRepository.tags((error, tags) => {
         if (error) {

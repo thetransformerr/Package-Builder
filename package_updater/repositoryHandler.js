@@ -28,6 +28,7 @@ const Repository = require( __dirname + '/repository.js');
 const SwiftVersionHandler = require( __dirname + '/swiftVersionHandler.js');
 
 function getRepositoriesToHandle(callback) {
+    'use strict';
     async.parallel({
         repositoriesToUpdate: getRepositoriesToUpdate,
         ibmSwiftRepositories: getIBMSwiftRepositories
@@ -44,6 +45,8 @@ function getRepositoriesToHandle(callback) {
 }
 
 function getRepositoriesToUpdate(callback) {
+    'use strict';
+
     var repositoriesToUpdate = {};
 
     const repositoriesToUpdateReader = readline.createInterface({
@@ -65,6 +68,8 @@ function getRepositoriesToUpdate(callback) {
 }
 
 function getIBMSwiftRepositories(callback) {
+    'use strict';
+
     const github = new GithubAPI({
         protocol: "https",
         host: "api.github.com",
@@ -91,6 +96,8 @@ function getIBMSwiftRepositories(callback) {
 
 // @param repositories - githubAPI repository
 function clone(repositories, workDirectory, callback) {
+    'use strict';
+
     function cloneRepository(repository, callback) {
         cloneRepositoryByURLAndName(repository.git_url, repository.name, workDirectory,
             (error, clonedRepository) => {
@@ -104,6 +111,8 @@ function clone(repositories, workDirectory, callback) {
 }
 
 function cloneRepositoryByURLAndName(repositoryURL, repositoryName, workDirectory, callback) {
+    'use strict';
+
     console.log(`cloning repository ${repositoryName}`);
     const repositoryDirectory = workDirectory + '/' + repositoryName;
     git.Clone(repositoryURL, repositoryDirectory).then(clonedRepository => {
@@ -114,12 +123,15 @@ function cloneRepositoryByURLAndName(repositoryURL, repositoryName, workDirector
 
 // @param repositories - Repository
 function pushNewVersions(branchName, swiftVersion, repositories, versions, callback) {
+    'use strict';
     async.map(repositories, async.apply(pushNewVersion, branchName, swiftVersion, versions),
               callback);
 }
 
 // @param repository - Repository
 function pushNewVersion(branchName, swiftVersion, versions, repository, callback) {
+    'use strict';
+
     console.log(`handling repository ${repository.githubAPIRepository.name}`);
     console.log(`\tbranch ${branchName} swiftVersion ${swiftVersion}`);
 
@@ -136,12 +148,15 @@ function pushNewVersion(branchName, swiftVersion, versions, repository, callback
 
 // @param repositories - Repository
 function submitPRs(branchName, repositories, callback) {
+    'use strict';
+
     Repository.log(repositories, 'submiting PRs for repositories:');
     callback(null, 'done');
 }
 
 // @param repository - Repository
 function updatePackageDotSwift(repository, versions, callback) {
+    'use strict';
     spmHandler.updateDependencies(repository.nodegitRepository.workdir(), repository.packageJSON,
         versions, (error, updatedDependencies) => {
             if (error) {
@@ -161,12 +176,15 @@ function updatePackageDotSwift(repository, versions, callback) {
 
 // @param repository - simplegit repository
 function commitPackageDotSwift(repository, updatedDependencies, callback) {
+    'use strict';
+
     var message = 'updated dependency versions in Package.swift';
     var detailsMessage = composeDetailsUpdatePackageDotSwiftCommitMessage(updatedDependencies);
     repository.commit(message, 'Package.swift', { '--message': detailsMessage}, callback);
 }
 
 function composeDetailsUpdatePackageDotSwiftCommitMessage(updatedDependencies) {
+    'use strict';
     return updatedDependencies.reduce((message, dependency) => {
         return message + `set version  ${dependency.dependencyURL} to ${dependency.version}\n`;
     },"");

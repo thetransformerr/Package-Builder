@@ -27,6 +27,7 @@ const parameters = new Parameters();
 var branchName = "";
 
 parameters.read(() => {
+    'use strict';
     console.log(`setting Kitura Version to ${parameters.kituraVersion}`);
     console.log(`setting swift version to ${parameters.swiftVersion}`);
     branchName = `automatic_migration_to_${parameters.kituraVersion}`;
@@ -48,6 +49,7 @@ parameters.read(() => {
 });
 
 function setup(callback) {
+    'use strict';
     async.parallel({ workDirectory: makeWorkDirectory,
                      repositoriesToHandle: repositoryHandler.getRepositoriesToHandle
                    }, (error, results) =>  callback(error, results.repositoriesToHandle,
@@ -55,10 +57,12 @@ function setup(callback) {
 }
 
 function getGoodByeMessage() {
+    'use strict';
     return 'Done';
 }
 
 function shouldPush(repositories, newVersions, callback) {
+    'use strict';
     if (repositories.length < 1) {
         return callback('No repositories were changed - nothing to push', null, null);
     }
@@ -80,6 +84,7 @@ function shouldPush(repositories, newVersions, callback) {
 }
 
 function shouldSubmitPRs(repositories, callback) {
+    'use strict';
     Repository.log(repositories, 'Repositories to submit PRs:');
     parameters.shouldSubmitPRs(shouldSubmitPRs => {
         if (shouldSubmitPRs) {

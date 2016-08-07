@@ -22,6 +22,8 @@ const replace = require('replace');
 const semver = require('semver');
 
 function getPackageAsJSON(repositoryDirectory, callback) {
+    'use strict';
+
     const swiftDumpPackageCommand =
          `swift package dump-package --input ${repositoryDirectory}/Package.swift`;
 
@@ -39,6 +41,8 @@ function getPackageAsJSON(repositoryDirectory, callback) {
 }
 
 function updateDependencies(repositoryDirectory, packageJSON, versions, callback) {
+    'use strict';
+
     console.log(`update dependencies in ${repositoryDirectory}`);
 
     if (packageJSON.dependencies.length === 0) {
@@ -56,6 +60,8 @@ function updateDependencies(repositoryDirectory, packageJSON, versions, callback
 }
 
 function updateDependency(repositoryDirectory, dependencyURL, version, callback) {
+    'use strict';
+
     const major = semver.major(version);
     const minor = semver.minor(version);
 
@@ -75,6 +81,8 @@ function updateDependency(repositoryDirectory, dependencyURL, version, callback)
 }
 
 function verifyThePackageWasUpdated(repositoryDirectory, dependencyURL, version, callback) {
+    'use strict';
+
     getPackageAsJSON(repositoryDirectory, (error, packageJSON) => {
         if (error) {
             callback(error);
@@ -90,6 +98,7 @@ function verifyThePackageWasUpdated(repositoryDirectory, dependencyURL, version,
 }
 
 function hasDependencyWithVersions(packageJSON, dependencyURL, version) {
+    'use strict';
     return packageJSON.dependencies.some(dependency =>
         dependency.url === dependencyURL && dependency.version.lowerBound === version);
 }

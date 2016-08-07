@@ -21,12 +21,16 @@ const fs = require('fs');
 const SWIFT_VERSION_FILE = '.swift-version';
 
 function SwiftVersionHandler(repository, swiftVersion) {
+    'use strict';
+
     this.swiftVersionPath = repository.directory() + SWIFT_VERSION_FILE;
     this.swiftVersion = swiftVersion;
     this.simplegitRepository = repository.simplegitRepository;
 }
 
 SwiftVersionHandler.prototype.updateSwiftVersion = function(callback) {
+    'use strict';
+
     const self = this;
     readSwiftVersion(self.swiftVersionPath, (error, currentSwiftVersion) => {
         if (error) {
@@ -46,10 +50,13 @@ SwiftVersionHandler.prototype.updateSwiftVersion = function(callback) {
 
 // @param repository - simplegit repository
 function commitSwiftVersion(repository, swiftVersion, callback) {
+    'use strict';
     repository.add('.swift-version').commit(swiftVersion, '.swift-version', {}, callback);
 }
 
 function readSwiftVersion(swiftVersionPath, callback) {
+    'use strict';
+
     fs.access(swiftVersionPath, error => {
         if (error) {
             return callback(null, "");
@@ -64,6 +71,8 @@ function readSwiftVersion(swiftVersionPath, callback) {
 }
 
 function writeSwiftVersion(swiftVersionPath, swiftVersion, callback) {
+    'use strict';
+
     fs.writeFile(swiftVersionPath, swiftVersion + '\n', error => {
         if (error) {
             callback(error);

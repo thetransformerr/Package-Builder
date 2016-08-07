@@ -22,6 +22,8 @@ const spmHandler = require( __dirname + '/spmHandler.js');
 const git = require('nodegit');
 
 function Repository(nodegitRepository, githubAPIRepository, largestVersion, packageJSON) {
+    'use strict';
+
     this.nodegitRepository = nodegitRepository;
     this.githubAPIRepository = githubAPIRepository;
     this.simplegitRepository = simplegit(nodegitRepository.workdir());
@@ -30,18 +32,23 @@ function Repository(nodegitRepository, githubAPIRepository, largestVersion, pack
 }
 
 Repository.prototype.name = function() {
+    'use strict';
     return this.githubAPIRepository.name;
 };
 
 Repository.prototype.directory = function() {
+    'use strict';
     return this.nodegitRepository.workdir();
 };
 
 Repository.prototype.clone_url = function() {
+    'use strict';
     return this.nodegitRepository.clone_url();
 };
 
 Repository.log = function(repositories, title, doNotPrintEmpty) {
+    'use strict';
+
     if (repositories.length > 0) {
         console.log(title);
     }
@@ -53,6 +60,8 @@ Repository.log = function(repositories, title, doNotPrintEmpty) {
 // @param callback callback(error, repository)
 
 Repository.create = function(nodegitRepository, githubAPIRepository, workDirectory, callback) {
+    'use strict';
+
     gittags.latest(nodegitRepository.workdir(), (error, largestVersion) => {
         if (error) {
             callback(error);
@@ -66,6 +75,8 @@ Repository.create = function(nodegitRepository, githubAPIRepository, workDirecto
 };
 
 Repository.prototype.createBranch = function(branchName, callback) {
+    'use strict';
+
     const nodegitRepository = this.nodegitRepository;
     nodegitRepository.getHeadCommit().then(commit => {
         git.Branch.create(nodegitRepository, branchName, commit, false).then(reference => {
@@ -76,13 +87,16 @@ Repository.prototype.createBranch = function(branchName, callback) {
 };
 
 Repository.prototype.push = function(branchName, callback) {
+    'use strict';
     this.simplegitRepository.push('origin', branchName, callback);
 };
 
 Repository.prototype.pushTags = function(callback) {
+    'use strict';
     this.simplegitRepository.pushTags('origin', callback);
 };
 
 Repository.prototype.addTag = function(tag,callback) {
+    'use strict';
     this.simplegitRepository.addTag(tag, callback);
 };

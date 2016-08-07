@@ -20,11 +20,15 @@ const readline = require('readline');
 const async = require('async');
 
 function Parameters() {
+    'use strict';
+
     this.swiftVersion = null;
     this.kituraVersion = null;
 }
 
 Parameters.prototype.read = function(callback) {
+    'use strict';
+
     const self = this;
 
     getKituraVersion(function(kituraVersion) {
@@ -37,6 +41,8 @@ Parameters.prototype.read = function(callback) {
 };
 
 function getKituraVersion(callback) {
+    'use strict';
+
     return getVerifiedParameter(2,
         'Please enter Kitura version to set in format <major>.<minor>, e.g. 0.26',
         kituraVersion => /^(\d+)\.(\d+)$/.test(kituraVersion),
@@ -44,11 +50,14 @@ function getKituraVersion(callback) {
 }
 
 function getSwiftVersion(callback) {
+    'use strict';
     return getParameter(3,
         'Please enter swift version, e.g. DEVELOPMENT-SNAPSHOT-2016-06-20-a', callback);
 }
 
 function getParameter(parameterNumber, question, callback) {
+    'use strict';
+
     if (process.argv.length > parameterNumber) {
         callback(process.argv[parameterNumber]);
     }
@@ -58,6 +67,8 @@ function getParameter(parameterNumber, question, callback) {
 }
 
 function getParameterFromUser(question, callback) {
+    'use strict';
+
     const readlineInterface = readline.createInterface({
         input: process.stdin,
         output: process.stdout
@@ -71,6 +82,8 @@ function getParameterFromUser(question, callback) {
 }
 
 function getVerifiedParameter(parameterNumber, question, verify, callback) {
+    'use strict';
+
     var parameter = process.argv[parameterNumber];
 
     function getParameter(callback) {
@@ -82,6 +95,7 @@ function getVerifiedParameter(parameterNumber, question, verify, callback) {
 }
 
 function getBooleanParameter(parameterNumber, question, callback) {
+    'use strict';
     getVerifiedParameter(parameterNumber,
                          question + ' [Yes|No]',
                          answer => answer === 'Yes' || answer === 'No',
@@ -90,9 +104,11 @@ function getBooleanParameter(parameterNumber, question, callback) {
 
 
 Parameters.prototype.shouldPush = function(callback) {
+    'use strict';
     getBooleanParameter(4, 'Would you like to push the changes', callback);
 };
 
 Parameters.prototype.shouldSubmitPRs = function(callback) {
+    'use strict';
     getBooleanParameter(5, 'Would you like to submit the PRs?', callback);
 };
