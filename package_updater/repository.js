@@ -30,7 +30,7 @@ const gittags = require('git-tags');
 const spmHandler = require( __dirname + '/spmHandler.js');
 const git = require('nodegit');
 
-Repository.prototype.name = function() {
+Repository.prototype.getName = function() {
     'use strict';
     return this.githubAPIRepository.name;
 };
@@ -51,7 +51,7 @@ Repository.log = function(repositories, title, doNotPrintEmpty) {
     if (repositories.length > 0 || !doNotPrintEmpty) {
         console.log(title);
     }
-    repositories.forEach(repository => console.log(`\t${repository.name()}`));
+    repositories.forEach(repository => console.log(`\t${repository.getName()}`));
 };
 
 
