@@ -19,7 +19,7 @@ const SWIFT_VERSION_FILE = '.swift-version';
 function SwiftVersionHandler(repository, swiftVersion) {
     'use strict';
 
-    this.swiftVersionPath = repository.directory() + SWIFT_VERSION_FILE;
+    this.swiftVersionPath = repository.getDirectory() + SWIFT_VERSION_FILE;
     this.swiftVersion = swiftVersion;
     this.simplegitRepository = repository.simplegitRepository;
 }

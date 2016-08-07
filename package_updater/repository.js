@@ -35,7 +35,7 @@ Repository.prototype.getName = function() {
     return this.githubAPIRepository.name;
 };
 
-Repository.prototype.directory = function() {
+Repository.prototype.getDirectory = function() {
     'use strict';
     return this.nodegitRepository.workdir();
 };
