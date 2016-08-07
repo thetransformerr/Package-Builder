@@ -96,7 +96,7 @@ function doesRepositoryDependOn(packageJSON, dependeeRepositories) {
     'use strict';
     return packageJSON.dependencies.some(dependency =>
         dependeeRepositories.some(dependeeRepository =>
-            dependeeRepository.githubAPIRepository.clone_url === dependency.url));
+                                  dependeeRepository.getCloneURL() === dependency.url));
 }
 
 // @param repositoriesToCheck - Repository
@@ -167,7 +167,7 @@ function getNewVersions(kituraVersion, repositories, callback) {
     getRepositoriesToBumpVersion(repositories, (error, repositoriesToBumpVersion) => {
         var newVersions = {};
         repositoriesToBumpVersion.forEach(repository =>
-            newVersions[repository.githubAPIRepository.clone_url] =
+            newVersions[repository.getCloneURL()] =
                 getBumpedVersion(repository, kituraVersion));
 
         callback(null, repositoriesToBumpVersion, newVersions);
