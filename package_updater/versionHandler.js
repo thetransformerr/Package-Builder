@@ -25,7 +25,7 @@ const Repository = require( __dirname + '/repository.js');
 // @param repository - Repository
 function isKituraCoreRepository(repository) {
     'use strict';
-    return repository.githubAPIRepository.name.startsWith('Kitura');
+    return repository.name().startsWith('Kitura');
 }
 
 // @param repository - Repository

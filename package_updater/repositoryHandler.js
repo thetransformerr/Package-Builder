@@ -169,7 +169,7 @@ function updatePackageDotSwift(repository, versions, callback) {
 function pushNewVersion(branchName, swiftVersion, versions, repository, callback) {
     'use strict';
 
-    console.log(`handling repository ${repository.githubAPIRepository.name}`);
+    console.log(`handling repository ${repository.name()}`);
     console.log(`\tbranch ${branchName} swiftVersion ${swiftVersion}`);
 
     const swiftVersionHandler = new SwiftVersionHandler(repository, swiftVersion);
