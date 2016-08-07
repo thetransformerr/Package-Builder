@@ -25,6 +25,7 @@ const untildify = require('untildify');
 const async = require('async');
 const spmHandler = require( __dirname + '/spmHandler.js');
 const Repository = require( __dirname + '/repository.js');
+const SwiftVersionHandler = require( __dirname + '/swiftVersionHandler.js');
 
 function getRepositoriesToHandle(callback) {
     async.parallel({
@@ -122,9 +123,12 @@ function pushNewVersion(branchName, swiftVersion, versions, repository, callback
     console.log(`handling repository ${repository.githubAPIRepository.name}`);
     console.log(`\tbranch ${branchName} swiftVersion ${swiftVersion}`);
 
+    const swiftVersionHandler = new SwiftVersionHandler(repository, swiftVersion);
+    const updateSwiftVersion = swiftVersionHandler.updateSwiftVersion.bind(swiftVersionHandler);
+
     async.series([async.apply(createBranch, branchName, repository.nodegitRepository),
                   async.apply(updatePackageDotSwift, repository, versions),
-                  async.apply(updateSwiftVersion, repository, swiftVersion)],
+                  updateSwiftVersion],
                  error => callback(error, repository));
 }
 
@@ -173,53 +177,4 @@ function composeDetailsUpdatePackageDotSwiftCommitMessage(updatedDependencies) {
     return updatedDependencies.reduce(function(message, dependency) {
         return message + `changed version of ${dependency.dependencyURL} to ${dependency.version}\n`;
     },"");
-}
-
-// @param repository - Repository
-function updateSwiftVersion(repository, swiftVersion, callback) {
-    readSwiftVersion(repository.directory(), (error, currentSwiftVersion) => {
-        if (error) {
-            callback(error);
-        }
-        if (swiftVersion === currentSwiftVersion) {
-            return callback(null);
-        }
-        writeSwiftVersion(repository.directory(), swiftVersion, error => {
-            if (error) {
-                callback(error);
-            }
-            commitSwiftVersion(repository.simplegitRepository, swiftVersion, callback);
-        });
-    });
-}
-
-// @param repository - simplegit repository
-function commitSwiftVersion(repository, swiftVersion, callback) {
-    repository.add('.swift-version').commit(swiftVersion, '.swift-version', {}, callback);
-}
-
-function readSwiftVersion(repositoryDirectory, callback) {
-    const swiftVersionPath = repositoryDirectory + '.swift-version';
-
-    fs.access(swiftVersionPath, error => {
-        if (error) {
-            return callback(null, "");
-        }
-        fs.readFile(swiftVersionPath, (error, data) => {
-            if (error) {
-                return callback(error);
-            }
-            return callback(null, data);
-        });
-    });
-}
-
-function writeSwiftVersion(repositoryDirectory, swiftVersion, callback) {
-    const swiftVersionPath = repositoryDirectory + '.swift-version';
-    fs.writeFile(swiftVersionPath, swiftVersion + '\n', error => {
-        if (error) {
-            callback(error);
-        }
-        callback(null);
-    });
 }
