@@ -19,6 +19,7 @@ const repositoryHandler = require( __dirname + '/repositoryHandler.js');
 const makeWorkDirectory = require( __dirname + '/makeWorkDirectory.js');
 const versionHandler = require( __dirname + '/versionHandler.js');
 const getRepositoriesToHandle = require( __dirname + '/getRepositoriesToHandle.js');
+const clone = require( __dirname + '/clone.js');
 
 const Repository = require( __dirname + '/repository.js');
 const Parameters = require( __dirname + '/parameters.js');
@@ -80,7 +81,7 @@ parameters.read(() => {
     branchName = `automatic_migration_to_${parameters.kituraVersion}`;
 
     async.waterfall([setup,
-                     repositoryHandler.clone,
+                     clone,
                      async.apply(versionHandler.getNewVersions, parameters.kituraVersion),
                      shouldPush,
                      async.apply(repositoryHandler.pushNewVersions, branchName,

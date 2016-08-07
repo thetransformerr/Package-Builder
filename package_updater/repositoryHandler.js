@@ -16,38 +16,10 @@
 
 // module.exports defined at the bottom of the file
 
-const git = require('nodegit');
 const async = require('async');
 const spmHandler = require( __dirname + '/spmHandler.js');
 const Repository = require( __dirname + '/repository.js');
 const SwiftVersionHandler = require( __dirname + '/swiftVersionHandler.js');
-
-function cloneRepositoryByURLAndName(repositoryURL, repositoryName, workDirectory, callback) {
-    'use strict';
-
-    console.log(`cloning repository ${repositoryName}`);
-    const repositoryDirectory = workDirectory + '/' + repositoryName;
-    git.Clone(repositoryURL, repositoryDirectory).then(clonedRepository => {
-        console.log(`cloned repository ${clonedRepository.workdir()}`);
-        callback(null, clonedRepository);
-    }).catch(callback);
-}
-
-// @param repositories - githubAPI repository
-function clone(repositories, workDirectory, callback) {
-    'use strict';
-
-    function cloneRepository(repository, callback) {
-        cloneRepositoryByURLAndName(repository.git_url, repository.name, workDirectory,
-            (error, clonedRepository) => {
-                if (error) {
-                    return callback(error, null);
-                }
-                Repository.create(clonedRepository, repository, workDirectory, callback);
-            });
-    }
-    async.map(repositories, cloneRepository, callback);
-}
 
 // @param repositories - Repository
 function submitPRs(branchName, repositories, callback) {
@@ -119,5 +91,4 @@ function pushNewVersions(branchName, swiftVersion, repositories, versions, callb
               callback);
 }
 
-module.exports = {clone: clone,
-                  pushNewVersions: pushNewVersions, submitPRs: submitPRs};
+module.exports = {pushNewVersions: pushNewVersions, submitPRs: submitPRs};
