@@ -31,7 +31,7 @@ function isKituraCoreRepository(repository) {
 // @param repositories - Repository
 function getNewVersions(kituraVersion, repositories, callback) {
     Repository.log(repositories, `calculate new versions for repositories below, kitura version ${kituraVersion}`);
-    getRepositoriesToBumpVersion(repositories, function(error, repositoriesToBumpVersion) {
+    getRepositoriesToBumpVersion(repositories, (error, repositoriesToBumpVersion) => {
         var newVersions = {};
         repositoriesToBumpVersion.forEach(repository =>
             newVersions[repository.githubAPIRepository.clone_url] = getBumpedVersion(repository, kituraVersion));
@@ -50,7 +50,7 @@ function getBumpedVersion(repository, kituraVersion) {
 
 // @param repositories - Repository
 function getRepositoriesToBumpVersion(repositories, callback) {
-    getChangedRepositories(repositories, function(error, changedRepositories) {
+    getChangedRepositories(repositories, (error, changedRepositories) => {
         if (error) {
             callback(error, null, null);
         }
@@ -97,15 +97,14 @@ function getDependentRepositories(repositoriesToCheck, dependeeRepositories) {
 
 // @param dependeeRepositories - Repository
 function doesRepositoryDependOn(packageJSON, dependeeRepositories) {
-    return packageJSON.dependencies.some(function(dependency) {
-        return dependeeRepositories.some(dependeeRepository =>
-                                         dependeeRepository.githubAPIRepository.clone_url === dependency.url);
-    });
+    return packageJSON.dependencies.some(dependency =>
+        dependeeRepositories.some(dependeeRepository =>
+            dependeeRepository.githubAPIRepository.clone_url === dependency.url));
 }
 
 // @param repositoriesToCheck - Repository
 function getChangedRepositories(repositories, callback) {
-    async.filter(repositories, function(repository, filterCallback) {
+    async.filter(repositories, (repository, filterCallback) => {
         wasRepositoryChangedAfterVersion(repository.largestVersion, repository.nodegitRepository,
                                          filterCallback);
     }, callback);
@@ -113,11 +112,11 @@ function getChangedRepositories(repositories, callback) {
 
 // @param repository - nodegit repository
 function wasRepositoryChangedAfterVersion(version, repository, callback) {
-    getTagCommit(version, repository.workdir(), function(error, tagCommit) {
+    getTagCommit(version, repository.workdir(), (error, tagCommit) => {
         if (error) {
             return callback(error, false);
         }
-        repository.getHeadCommit().then(function(headCommit) {
+        repository.getHeadCommit().then(headCommit => {
             console.log(`${repository.workdir()}: ${version} ${tagCommit.sha} ${tagCommit.date}, head commit ${headCommit.sha()} ${headCommit.date()}`);
             callback(null, isLaterCommit(headCommit, tagCommit));
         });
@@ -142,7 +141,7 @@ function isLaterCommit(commit1, commit2) {
 
 function getTagCommit(tag, repositoryDirectory, callback) {
     const gittoolsRepository = new GittoolsRepository(repositoryDirectory);
-    gittoolsRepository.tags(function(error, tags) {
+    gittoolsRepository.tags((error, tags) => {
         if (error) {
             return callback(error, null);
         }

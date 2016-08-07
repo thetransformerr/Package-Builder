@@ -23,7 +23,7 @@ const semver = require('semver');
 
 function getPackageAsJSON(repositoryDirectory, callback) {
     const swiftDumpPackageCommand = `swift package dump-package --input ${repositoryDirectory}/Package.swift`;
-    exec(swiftDumpPackageCommand, function (error, stdout, stderr) {
+    exec(swiftDumpPackageCommand, (error, stdout, stderr) => {
         var packageJSON = null
         if (error) {
             return callback(error, null);
@@ -43,7 +43,7 @@ function updateDependencies(repositoryDirectory, packageJSON, versions, callback
         return callback(null, []);
     }
 
-    async.mapSeries(packageJSON.dependencies, function(dependency, callback) {
+    async.mapSeries(packageJSON.dependencies, (dependency, callback) => {
         const newVersion = versions[dependency.url];
         if (newVersion) {
             return updateDependency(repositoryDirectory, dependency.url, newVersion,
@@ -70,7 +70,7 @@ function updateDependency(repositoryDirectory, dependencyURL, version, callback)
 }
 
 function verifyThePackageWasUpdated(repositoryDirectory, dependencyURL, version, callback) {
-    getPackageAsJSON(repositoryDirectory, function(error, packageJSON) {
+    getPackageAsJSON(repositoryDirectory, (error, packageJSON) => {
         if (error) {
             callback(error);
         }

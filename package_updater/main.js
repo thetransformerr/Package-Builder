@@ -26,7 +26,7 @@ const Parameters = require( __dirname + '/parameters.js');
 const parameters = new Parameters();
 var branchName = ""
 
-parameters.read(function() {
+parameters.read(() => {
     console.log(`setting Kitura Version to ${parameters.kituraVersion}`);
     console.log(`setting swift version to ${parameters.swiftVersion}`);
     branchName = `automatic_migration_to_${parameters.kituraVersion}`;
@@ -38,7 +38,7 @@ parameters.read(function() {
                      async.apply(repositoryHandler.pushNewVersions, branchName, parameters.swiftVersion),
                      shouldSubmitPRs,
                      async.apply(repositoryHandler.submitPRs, branchName)],
-                    function(error, result) {
+                    (error, result) => {
                         if (error) {
                             return console.log(error);
                         }
@@ -68,7 +68,7 @@ function shouldPush(repositories, newVersions, callback) {
     var signature = git.Signature.default(repositories[0].nodegitRepository);
     console.log(`signature to be used: ${signature.name()} ${signature.email()}`);
 
-    parameters.shouldPush(function(shouldPush) {
+    parameters.shouldPush(shouldPush => {
         if (shouldPush) {
             callback(null, repositories, newVersions);
         } else {
@@ -79,7 +79,7 @@ function shouldPush(repositories, newVersions, callback) {
 
 function shouldSubmitPRs(repositories, callback) {
     Repository.log(repositories, 'Repositories to submit PRs:');
-    parameters.shouldSubmitPRs(function(shouldSubmitPRs) {
+    parameters.shouldSubmitPRs(shouldSubmitPRs => {
         if (shouldSubmitPRs) {
             callback(null, repositories);
         } else {

@@ -31,11 +31,11 @@ function getRepositoriesToHandle(callback) {
     async.parallel({
         repositoriesToUpdate: getRepositoriesToUpdate,
         ibmSwiftRepositories: getIBMSwiftRepositories
-    }, function(error, result) {
+    }, (error, result) => {
         if (error) {
             return callback(error);
         }
-        const repositoriesToHandle = result.ibmSwiftRepositories.filter(function(repository) {
+        const repositoriesToHandle = result.ibmSwiftRepositories.filter(repository => {
             return result.repositoriesToUpdate[repository.name];
         });
 
@@ -50,7 +50,7 @@ function getRepositoriesToUpdate(callback) {
         input: fs.createReadStream('repos_to_update.txt')
     });
 
-    repositoriesToUpdateReader.on('line', function(line) {
+    repositoriesToUpdateReader.on('line', line => {
         line = line.split('#')[0]
         line = line.trim()
         if (!line) {
@@ -59,7 +59,7 @@ function getRepositoriesToUpdate(callback) {
         repositoriesToUpdate[line] = true
     });
 
-    repositoriesToUpdateReader.on('close', function() {
+    repositoriesToUpdateReader.on('close', () => {
         callback(null, repositoriesToUpdate);
     });
 }
@@ -74,7 +74,7 @@ function getIBMSwiftRepositories(callback) {
     });
 
     fs.readFile(untildify('~/.ssh/package_updater_github_token.txt'), 'utf8',
-         function (error, token) {
+         (error, token) => {
              if (error) {
                  callback(error, null);
              }
@@ -93,7 +93,7 @@ function getIBMSwiftRepositories(callback) {
 function clone(repositories, workDirectory, callback) {
     function cloneRepository(repository, callback) {
         cloneRepositoryByURLAndName(repository.git_url, repository.name, workDirectory,
-            function(error, clonedRepository) {
+            (error, clonedRepository) => {
                 if (error) {
                     return callback(error, null);
                 }
@@ -106,7 +106,7 @@ function clone(repositories, workDirectory, callback) {
 function cloneRepositoryByURLAndName(repositoryURL, repositoryName, workDirectory, callback) {
     console.log(`cloning repository ${repositoryName}`);
     const repositoryDirectory = workDirectory + '/' + repositoryName;
-    git.Clone(repositoryURL, repositoryDirectory).then(function(clonedRepository) {
+    git.Clone(repositoryURL, repositoryDirectory).then(clonedRepository => {
         console.log(`cloned repository ${clonedRepository.workdir()}`)
         callback(null, clonedRepository);
     }).catch(callback);
@@ -143,7 +143,7 @@ function submitPRs(branchName, repositories, callback) {
 // @param repository - Repository
 function updatePackageDotSwift(repository, versions, callback) {
     spmHandler.updateDependencies(repository.nodegitRepository.workdir(), repository.packageJSON, versions,
-        function(error, updatedDependencies) {
+        (error, updatedDependencies) => {
             if (error) {
                 return callback(error);
             }
@@ -166,7 +166,7 @@ function commitPackageDotSwift(repository, updatedDependencies, callback) {
 }
 
 function composeDetailsUpdatePackageDotSwiftCommitMessage(updatedDependencies) {
-    return updatedDependencies.reduce(function(message, dependency) {
+    return updatedDependencies.reduce((message, dependency) => {
         return message + `changed version of ${dependency.dependencyURL} to ${dependency.version}\n`;
     },"");
 }

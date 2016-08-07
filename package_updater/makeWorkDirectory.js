@@ -21,7 +21,5 @@ module.exports = function(callback) {
     const dateString = format.asString('MM_dd_yy', new Date())
     const workDirectory = 'KituraPackagesToUpdate_' + dateString
 
-    fs.mkdir(workDirectory, function(error) {
-        callback(error, workDirectory);
-    });
+    fs.mkdir(workDirectory, error => callback(error, workDirectory));
 }

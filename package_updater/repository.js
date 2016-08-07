@@ -49,12 +49,12 @@ Repository.log = function(repositories, title, doNotPrintEmpty) {
 // @param callback callback(error, repository)
 
 Repository.create = function(nodegitRepository, githubAPIRepository, workDirectory, callback) {
-    gittags.latest(nodegitRepository.workdir(), function(error, largestVersion) {
+    gittags.latest(nodegitRepository.workdir(), (error, largestVersion) => {
         if (error) {
             callback(error);
         }
         console.log(`last tag in ${githubAPIRepository.name} is ${largestVersion}`);
-        spmHandler.getPackageAsJSON(nodegitRepository.workdir(), function(error, packageJSON) {
+        spmHandler.getPackageAsJSON(nodegitRepository.workdir(), (error, packageJSON) => {
             callback(error, new Repository(nodegitRepository, githubAPIRepository,
                                            largestVersion, packageJSON));
         });
@@ -64,8 +64,8 @@ Repository.create = function(nodegitRepository, githubAPIRepository, workDirecto
 // @param repository - nodegit repository
 Repository.prototype.createBranch = function(branchName, callback) {
     const nodegitRepository = this.nodegitRepository;
-    nodegitRepository.getHeadCommit().then(function(commit) {
-        git.Branch.create(nodegitRepository, branchName, commit, false).then(function(reference) {
+    nodegitRepository.getHeadCommit().then(commit => {
+        git.Branch.create(nodegitRepository, branchName, commit, false).then(reference => {
             nodegitRepository.checkoutBranch(reference, new git.CheckoutOptions()).
                 then(() => callback(null)).catch(callback);
         }).catch(callback);
