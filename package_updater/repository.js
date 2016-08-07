@@ -48,7 +48,7 @@ Repository.prototype.clone_url = function() {
 Repository.log = function(repositories, title, doNotPrintEmpty) {
     'use strict';
 
-    if (repositories.length > 0) {
+    if (repositories.length > 0 || !doNotPrintEmpty) {
         console.log(title);
     }
     repositories.forEach(repository => console.log(`\t${repository.name()}`));
