@@ -42,7 +42,7 @@ Repository.prototype.directory = function() {
 
 Repository.prototype.getCloneURL = function() {
     'use strict';
-    return this.nodegitRepository.clone_url;
+    return this.githubAPIRepository.clone_url;
 };
 
 Repository.log = function(repositories, title, doNotPrintEmpty) {
