@@ -35,7 +35,8 @@ parameters.read(() => {
                      repositoryHandler.clone,
                      async.apply(versionHandler.getNewVersions, parameters.kituraVersion),
                      shouldPush,
-                     async.apply(repositoryHandler.pushNewVersions, branchName, parameters.swiftVersion),
+                     async.apply(repositoryHandler.pushNewVersions, branchName,
+                                 parameters.swiftVersion),
                      shouldSubmitPRs,
                      async.apply(repositoryHandler.submitPRs, branchName)],
                     (error, result) => {
@@ -49,7 +50,8 @@ parameters.read(() => {
 function setup(callback) {
     async.parallel({ workDirectory: makeWorkDirectory,
                      repositoriesToHandle: repositoryHandler.getRepositoriesToHandle
-                   }, (error, results) =>  callback(error, results.repositoriesToHandle, results.workDirectory));
+                   }, (error, results) =>  callback(error, results.repositoriesToHandle,
+                                                    results.workDirectory));
 }
 
 function getGoodByeMessage() {

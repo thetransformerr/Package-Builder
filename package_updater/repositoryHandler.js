@@ -14,8 +14,8 @@
  * limitations under the License.
  **/
 
-module.exports = {getRepositoriesToHandle: getRepositoriesToHandle, clone: clone, pushNewVersions: pushNewVersions,
-                  submitPRs: submitPRs};
+module.exports = {getRepositoriesToHandle: getRepositoriesToHandle, clone: clone,
+                  pushNewVersions: pushNewVersions, submitPRs: submitPRs};
 
 const readline = require('readline');
 const fs = require('fs');
@@ -112,7 +112,7 @@ function cloneRepositoryByURLAndName(repositoryURL, repositoryName, workDirector
     }).catch(callback);
 }
 
-// @param repositories - decorated repositories (nodegit repository, githubAPI repository, largestVersion, packageJSON)
+// @param repositories - Repository
 function pushNewVersions(branchName, swiftVersion, repositories, versions, callback) {
     async.map(repositories, async.apply(pushNewVersion, branchName, swiftVersion, versions),
               callback);
@@ -142,17 +142,18 @@ function submitPRs(branchName, repositories, callback) {
 
 // @param repository - Repository
 function updatePackageDotSwift(repository, versions, callback) {
-    spmHandler.updateDependencies(repository.nodegitRepository.workdir(), repository.packageJSON, versions,
-        (error, updatedDependencies) => {
+    spmHandler.updateDependencies(repository.nodegitRepository.workdir(), repository.packageJSON,
+        versions, (error, updatedDependencies) => {
             if (error) {
                 return callback(error);
             }
             if (!updatedDependencies) {
-                return callback('no updatedDependencies returned from spmHandler.updateDependencies');
+                return callback('no updatedDependencies returned from updateDependencies');
             }
             updatedDependencies = updatedDependencies.filter(member => member);
             if (updatedDependencies.length > 0) {
-                return commitPackageDotSwift(repository.simplegitRepository, updatedDependencies, callback);
+                return commitPackageDotSwift(repository.simplegitRepository,
+                                             updatedDependencies, callback);
             }
             callback(null);
         });
@@ -167,6 +168,6 @@ function commitPackageDotSwift(repository, updatedDependencies, callback) {
 
 function composeDetailsUpdatePackageDotSwiftCommitMessage(updatedDependencies) {
     return updatedDependencies.reduce((message, dependency) => {
-        return message + `changed version of ${dependency.dependencyURL} to ${dependency.version}\n`;
+        return message + `set version  ${dependency.dependencyURL} to ${dependency.version}\n`;
     },"");
 }
