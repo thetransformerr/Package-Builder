@@ -20,6 +20,7 @@ const makeWorkDirectory = require( __dirname + '/makeWorkDirectory.js');
 const versionHandler = require( __dirname + '/versionHandler.js');
 const getRepositoriesToHandle = require( __dirname + '/getRepositoriesToHandle.js');
 const clone = require( __dirname + '/clone.js');
+const submitPRs = require( __dirname + '/submitPRs.js');
 
 const Repository = require( __dirname + '/repository.js');
 const Parameters = require( __dirname + '/parameters.js');
@@ -87,7 +88,7 @@ parameters.read(() => {
                      async.apply(repositoryHandler.pushNewVersions, branchName,
                                  parameters.swiftVersion),
                      shouldSubmitPRs,
-                     async.apply(repositoryHandler.submitPRs, branchName)],
+                     async.apply(submitPRs, branchName)],
                     error => {
                         if (error) {
                             return console.log(error);

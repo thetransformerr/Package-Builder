@@ -18,17 +18,7 @@
 
 const async = require('async');
 const spmHandler = require( __dirname + '/spmHandler.js');
-const Repository = require( __dirname + '/repository.js');
 const SwiftVersionHandler = require( __dirname + '/swiftVersionHandler.js');
-
-// @param repositories - Repository
-function submitPRs(branchName, repositories, callback) {
-    'use strict';
-
-    Repository.log(repositories, 'submiting PRs for repositories:');
-    callback(null, 'done');
-}
-
 
 function composeDetailsUpdatePackageDotSwiftCommitMessage(updatedDependencies) {
     'use strict';
@@ -91,4 +81,4 @@ function pushNewVersions(branchName, swiftVersion, repositories, versions, callb
               callback);
 }
 
-module.exports = {pushNewVersions: pushNewVersions, submitPRs: submitPRs};
+module.exports = {pushNewVersions: pushNewVersions};
