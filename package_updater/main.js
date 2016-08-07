@@ -18,6 +18,7 @@ const async = require('async');
 const repositoryHandler = require( __dirname + '/repositoryHandler.js');
 const makeWorkDirectory = require( __dirname + '/makeWorkDirectory.js');
 const versionHandler = require( __dirname + '/versionHandler.js');
+const getRepositoriesToHandle = require( __dirname + '/getRepositoriesToHandle.js');
 
 const Repository = require( __dirname + '/repository.js');
 const Parameters = require( __dirname + '/parameters.js');
@@ -28,7 +29,7 @@ var branchName = "";
 function setup(callback) {
     'use strict';
     async.parallel({ workDirectory: makeWorkDirectory,
-                     repositoriesToHandle: repositoryHandler.getRepositoriesToHandle
+                     repositoriesToHandle: getRepositoriesToHandle
                    }, (error, results) =>  callback(error, results.repositoriesToHandle,
                                                     results.workDirectory));
 }

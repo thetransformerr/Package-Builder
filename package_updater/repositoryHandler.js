@@ -16,82 +16,11 @@
 
 // module.exports defined at the bottom of the file
 
-const readline = require('readline');
-const fs = require('fs');
-const GithubAPI = require('github');
 const git = require('nodegit');
-const untildify = require('untildify');
 const async = require('async');
 const spmHandler = require( __dirname + '/spmHandler.js');
 const Repository = require( __dirname + '/repository.js');
 const SwiftVersionHandler = require( __dirname + '/swiftVersionHandler.js');
-
-function getRepositoriesToUpdate(callback) {
-    'use strict';
-
-    var repositoriesToUpdate = {};
-
-    const repositoriesToUpdateReader = readline.createInterface({
-        input: fs.createReadStream('repos_to_update.txt')
-    });
-
-    repositoriesToUpdateReader.on('line', line => {
-        line = line.split('#')[0];
-        line = line.trim();
-        if (!line) {
-            return;
-        }
-        repositoriesToUpdate[line] = true;
-    });
-
-    repositoriesToUpdateReader.on('close', () => {
-        callback(null, repositoriesToUpdate);
-    });
-}
-
-function getIBMSwiftRepositories(callback) {
-    'use strict';
-
-    const github = new GithubAPI({
-        protocol: "https",
-        host: "api.github.com",
-        Promise: require('bluebird'),
-        followRedirects: false,
-        timeout: 5000
-    });
-
-    fs.readFile(untildify('~/.ssh/package_updater_github_token.txt'), 'utf8',
-         (error, token) => {
-             if (error) {
-                 callback(error, null);
-             }
-
-             github.authenticate({ type: "oauth", token: token.trim() });
-
-             github.repos.getForOrg({
-                 org: "IBM-Swift",
-                 type: "all",
-                 per_page: 300
-             }, callback);
-         });
-}
-
-function getRepositoriesToHandle(callback) {
-    'use strict';
-    async.parallel({
-        repositoriesToUpdate: getRepositoriesToUpdate,
-        ibmSwiftRepositories: getIBMSwiftRepositories
-    }, (error, result) => {
-        if (error) {
-            return callback(error);
-        }
-        const repositoriesToHandle = result.ibmSwiftRepositories.filter(repository => {
-            return result.repositoriesToUpdate[repository.name];
-        });
-
-        callback(null, repositoriesToHandle);
-    });
-}
 
 function cloneRepositoryByURLAndName(repositoryURL, repositoryName, workDirectory, callback) {
     'use strict';
@@ -190,5 +119,5 @@ function pushNewVersions(branchName, swiftVersion, repositories, versions, callb
               callback);
 }
 
-module.exports = {getRepositoriesToHandle: getRepositoriesToHandle, clone: clone,
+module.exports = {clone: clone,
                   pushNewVersions: pushNewVersions, submitPRs: submitPRs};
