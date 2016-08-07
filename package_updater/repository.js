@@ -40,7 +40,7 @@ Repository.prototype.directory = function() {
     return this.nodegitRepository.workdir();
 };
 
-Repository.prototype.clone_url = function() {
+Repository.prototype.getCloneURL = function() {
     'use strict';
     return this.nodegitRepository.clone_url;
 };
