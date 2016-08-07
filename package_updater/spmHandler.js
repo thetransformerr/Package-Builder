@@ -18,7 +18,7 @@
 
 const exec = require('child_process').exec;
 const async = require('async');
-const replace = require('replace');
+const replace = require('replace-in-file');
 const semver = require('semver');
 
 function getPackageAsJSON(repositoryDirectory, callback) {
@@ -45,6 +45,13 @@ function hasDependencyWithVersions(packageJSON, dependencyURL, version) {
         dependency.url === dependencyURL && dependency.version.lowerBound === version);
 }
 
+function getNotUpdatedPackageError(repositoryDirectory) {
+    'use strict';
+    return `Did not manage to update Package.swift in ${repositoryDirectory}.\n` +
+        'Verify that the dependency is in format .Package(url: <https url>,' +
+        '  majorVersion: <major>, minor: <minor>), exactly without redundant whitespace.';
+}
+
 function verifyThePackageWasUpdated(repositoryDirectory, dependencyURL, version, callback) {
     'use strict';
 
@@ -55,9 +62,7 @@ function verifyThePackageWasUpdated(repositoryDirectory, dependencyURL, version,
         if (hasDependencyWithVersions(packageJSON, dependencyURL, version)) {
             callback(null);
         } else {
-            callback(`Did not manage to update Package.swift in ${repositoryDirectory}.\n` +
-                'Verify that the dependency is in format .Package(url: <https url>,' +
-                '  majorVersion: <major>, minor: <minor>), exactly without redundant whitespace.');
+            callback(getNotUpdatedPackageError(repositoryDirectory));
         }
     });
 }
@@ -71,16 +76,21 @@ function updateDependency(repositoryDirectory, dependencyURL, version, callback)
     console.log(`updating dependency of ${dependencyURL} to version ${version},` +
                 ` major ${major}, minor ${minor}`);
     replace({
-        regex: '\\.Package\\(url: \\"' + dependencyURL +
-            '\\", majorVersion: [0-9]+, minor: [0-9]+\\)',
-        replacement: '.Package(url: "' + dependencyURL +
-            '", majorVersion: ' + major + ', minor: ' + minor + ')',
-        paths: [repositoryDirectory + '/Package.swift'],
-        recursive: false,
-        silent: true,
-    });
+        replace: new RegExp('\\.Package\\(url: \\"' + dependencyURL +
+                        '\\", majorVersion: [0-9]+, minor: [0-9]+\\)','g'),
+        with: '.Package(url: "' + dependencyURL +
+              '", majorVersion: ' + major + ', minor: ' + minor + ')',
+        files: repositoryDirectory + 'Package.swift'
+    }, (error, changedFiles) => {
+        if (error) {
+            callback(error);
+        }
 
-    verifyThePackageWasUpdated(repositoryDirectory, dependencyURL, version, callback);
+        if (changedFiles < 1) {
+            return callback(getNotUpdatedPackageError(repositoryDirectory));
+        }
+        verifyThePackageWasUpdated(repositoryDirectory, dependencyURL, version, callback);
+    });
 }
 
 function updateDependencies(repositoryDirectory, packageJSON, versions, callback) {
