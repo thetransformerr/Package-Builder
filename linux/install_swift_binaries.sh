@@ -26,6 +26,24 @@
 # If any commands fail, we want the shell script to exit immediately.
 set -e
 
+export CONST="20160807"
+export DATE=`echo ${SWIFT_SNAPSHOT} | awk -F- '{print $4$5$6}'`
+
+if [ $DATE -ge $CONST ]; then
+   export LIBDISPATCH_BRANCH="master"
+   export CFLAGS_STRING=""
+   # Set compiler environment variables
+   export CC="/usr/bin/clang-3.8"
+   export CXX="/usr/bin/clang-3.8"
+   export OBJC="/usr/bin/clang-3.8"
+   export OBJCXX="/usr/bin/clang-3.8"
+   # install correct version of clang
+   apt-get install -y clang-3.8 lldb-3.8
+else
+   export LIBDISPATCH_BRANCH="experimental/foundation"
+   export CFLAGS_STRING="CFLAGS=-fuse-ld=gold"
+fi
+
 # Environment vars
 version=`lsb_release -d | awk '{print tolower($2) $3}'`
 export UBUNTU_VERSION=`echo $version | awk -F. '{print $1"."$2}'`
@@ -52,8 +70,8 @@ else
   echo ">> Installing swift-corelibs-libdispatch..."
   # Remove any older versions of the Swift binaries from the file system
   find $WORK_DIR -name 'swift-corelibs-libdispatch' | xargs rm -rf
-  git clone -b experimental/foundation https://github.com/apple/swift-corelibs-libdispatch.git
-  cd swift-corelibs-libdispatch && git submodule init && git submodule update && sh ./autogen.sh && CFLAGS=-fuse-ld=gold ./configure --with-swift-toolchain=$WORK_DIR/$SWIFT_SNAPSHOT-$UBUNTU_VERSION/usr --prefix=$WORK_DIR/$SWIFT_SNAPSHOT-$UBUNTU_VERSION/usr && make && make install
+  git clone -b ${LIBDISPATCH_BRANCH}  https://github.com/apple/swift-corelibs-libdispatch.git
+  cd swift-corelibs-libdispatch && git submodule init && git submodule update && sh ./autogen.sh && $CFLAGS_STRING ./configure --with-swift-toolchain=$WORK_DIR/$SWIFT_SNAPSHOT-$UBUNTU_VERSION/usr --prefix=$WORK_DIR/$SWIFT_SNAPSHOT-$UBUNTU_VERSION/usr && make && make install
   # Return to previous directory
   cd -
 fi
