@@ -26,7 +26,7 @@
 # If any commands fail, we want the shell script to exit immediately.
 set -e
 
-export CONST="20160807"
+export CONST="20160801"
 export DATE=`echo ${SWIFT_SNAPSHOT} | awk -F- '{print $4$5$6}'`
 
 echo $CONST
@@ -35,7 +35,6 @@ echo $DATE
 if [ $DATE -ge $CONST ]; then
 	echo "Passed the date check.  Setup libdispatch stuff"
 	export LIBDISPATCH_BRANCH="master"
-	export CFLAGS_STRING=""
 	# Set compiler environment variables
 	export CC="/usr/bin/clang-3.8"
 	export CXX="/usr/bin/clang-3.8"
@@ -47,7 +46,7 @@ if [ $DATE -ge $CONST ]; then
 else
 	echo "Use old version of libdispatch"
 	export LIBDISPATCH_BRANCH="experimental/foundation"
-	export CFLAGS_STRING="CFLAGS=-fuse-ld=gold"
+	export CFLAGS="-fuse-ld=gold"
 fi
 
 # Environment vars
@@ -78,7 +77,9 @@ else
   find $WORK_DIR -name 'swift-corelibs-libdispatch' | xargs rm -rf
   echo "Get the ${LIBDISPATCH_BRANCH} branch"
   git clone -b ${LIBDISPATCH_BRANCH}  https://github.com/apple/swift-corelibs-libdispatch.git
-  cd swift-corelibs-libdispatch && git submodule init && git submodule update && sh ./autogen.sh && $CFLAGS_STRING ./configure --with-swift-toolchain=$WORK_DIR/$SWIFT_SNAPSHOT-$UBUNTU_VERSION/usr --prefix=$WORK_DIR/$SWIFT_SNAPSHOT-$UBUNTU_VERSION/usr && make && make install
+  echo "Compiling libdispatch"
+  cd swift-corelibs-libdispatch && git submodule init && git submodule update && sh ./autogen.sh && ./configure --with-swift-toolchain=$WORK_DIR/$SWIFT_SNAPSHOT-$UBUNTU_VERSION/usr --prefix=$WORK_DIR/$SWIFT_SNAPSHOT-$UBUNTU_VERSION/usr && make && make install
+  echo "Finished building libdispatch"
   # Return to previous directory
   cd -
 fi
