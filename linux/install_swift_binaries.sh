@@ -46,8 +46,9 @@ if [ $DATE -ge $CONST ]; then
 else
 	echo "Use old version of libdispatch"
 	export LIBDISPATCH_BRANCH="experimental/foundation"
-	export CFLAGS="-fuse-ld=gold"
 fi
+
+export CFLAGS="-fuse-ld=gold"
 
 # Environment vars
 version=`lsb_release -d | awk '{print tolower($2) $3}'`
