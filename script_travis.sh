@@ -22,26 +22,9 @@
 # If any commands fail, we want the shell script to exit immediately.
 set -e
 
-# Verify input params
-if [ "$#" -ne 4 ]; then
-  echo "Usage: script_travis [TRAVIS_OS_NAME] [TRAVIS_BRANCH] [TRAVIS_BUILD_DIR] [PROJECT]"
-  exit 1
-fi
-
 # Set variables
-os=$1
-branch=$2
-build_dir=$3
-project=$4
+branch=$1
 
 echo ">> Let's build and test the '$branch' branch for $project."
-if [ $os == "linux" ];
-then 
-   ./Package-Builder/run-kitura-ubuntu-container.sh $branch $build_dir $project 
-fi
-if [ $os == "osx" ];
-then 
-   ./Package-Builder/build-package.sh
-fi
+./Package-Builder/build-package.sh
 echo ">> Build and tests completed. See above for status."
-

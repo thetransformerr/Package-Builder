@@ -23,8 +23,6 @@
 # If any commands fail, we want the shell script to exit immediately.
 set -e
 
-export WORK_DIR=/root
-
 # Utility functions
 function sourceScript () {
   if [ -e "$1" ]; then
@@ -90,7 +88,7 @@ echo ">> Finished running makefile"
 # Copy test credentials for project if available
 if [ -e "${projectFolder}/Kitura-TestingCredentials/${projectName}" ]; then
 	echo ">> Found folder with test credentials for ${projectName}."
-  # Copy test credentials over 
+  # Copy test credentials over
   echo ">> copying ${projectFolder}/Kitura-TestingCredentials/${projectName} to ${projectFolder}"
   cp -RP ${projectFolder}/Kitura-TestingCredentials/${projectName}/* ${projectFolder}
 else
@@ -119,4 +117,3 @@ sourceScript "${projectFolder}/Package-Builder/${projectName}/common/after_tests
 
 # Execute OS specific post-test steps
 sourceScript "${projectFolder}/Package-Builder/${projectName}/${osName}/after_tests.sh" ">> Completed ${osName} post-tests steps."
-
