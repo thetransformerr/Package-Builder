@@ -26,8 +26,8 @@
 # If any commands fail, we want the shell script to exit immediately.
 set -e
 
-apt-get update
-apt-get -y install clang-3.8 lldb-3.8 libicu-dev libkqueue-dev libtool libcurl4-openssl-dev libbsd-dev libblocksruntime-dev build-essential libwrap0-dev libssl-dev libc-ares-dev uuid-dev xsltproc
+sudo apt-get update
+sudo apt-get -y install clang-3.8 lldb-3.8 libicu-dev libkqueue-dev libtool libcurl4-openssl-dev libbsd-dev libblocksruntime-dev build-essential libwrap0-dev libssl-dev libc-ares-dev uuid-dev xsltproc
 
 echo "Setting variables"
 export WORK_DIR=$2
