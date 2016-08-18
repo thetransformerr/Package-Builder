@@ -23,6 +23,9 @@
 # If any commands fail, we want the shell script to exit immediately.
 set -e
 
+branch=$1
+build_dir=$2
+
 # Utility functions
 function sourceScript () {
   if [ -e "$1" ]; then
@@ -71,7 +74,7 @@ fi
 echo ">> SWIFT_SNAPSHOT: $SWIFT_SNAPSHOT"
 
 # Install Swift binaries
-source ${projectFolder}/Package-Builder/${osName}/install_swift_binaries.sh
+source ${projectFolder}/Package-Builder/${osName}/install_swift_binaries.sh $build_dir
 
 # Show path
 echo ">> PATH: $PATH"
