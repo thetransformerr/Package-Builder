@@ -26,60 +26,37 @@
 # If any commands fail, we want the shell script to exit immediately.
 set -e
 
-export CONST="20160801"
-export DATE=`echo ${SWIFT_SNAPSHOT} | awk -F- '{print $4$5$6}'`
+apt-get update
+apt-get -y install clang-3.8 lldb-3.8 libicu-dev libkqueue-dev libtool libcurl4-openssl-dev libbsd-dev libblocksruntime-dev build-essential libwrap0-dev libssl-dev libc-ares-dev uuid-dev xsltproc
 
-echo $CONST
-echo $DATE
-
-if [ $DATE -ge $CONST ]; then
-	echo "Passed the date check.  Setup libdispatch stuff"
-	export LIBDISPATCH_BRANCH="master"
-	# Set compiler environment variables
-	export CC="/usr/bin/clang-3.8"
-	export CXX="/usr/bin/clang-3.8"
-	export OBJC="/usr/bin/clang-3.8"
-	export OBJCXX="/usr/bin/clang-3.8"
-	# install correct version of clang
-	echo "Install new version of clang"
-	apt-get install -y clang-3.8 lldb-3.8
-else
-	echo "Use old version of libdispatch"
-	export LIBDISPATCH_BRANCH="experimental/foundation"
-    export CFLAGS="-fuse-ld=gold"
-fi
+echo "Setting variables"
+export WORK_DIR=$2
+echo $WORK_DIR
+export LIBDISPATCH_BRANCH="master"
+# Set compiler environment variables
+export CC="/usr/bin/clang-3.8"
+export CXX="/usr/bin/clang-3.8"
+export OBJC="/usr/bin/clang-3.8"
+export OBJCXX="/usr/bin/clang-3.8"
 
 # Environment vars
 version=`lsb_release -d | awk '{print tolower($2) $3}'`
 export UBUNTU_VERSION=`echo $version | awk -F. '{print $1"."$2}'`
 export UBUNTU_VERSION_NO_DOTS=`echo $version | awk -F. '{print $1$2}'`
 
-if [ -d "${WORK_DIR}/${SWIFT_SNAPSHOT}-${UBUNTU_VERSION}" ]; then
-  echo ">> Swift binaries '${SWIFT_SNAPSHOT}' are already installed."
-else
-  echo ">> Installing '${SWIFT_SNAPSHOT}'..."
-  # Remove from PATH any references to previous versions of the Swift binaries
-  for INSTALL_DIR in `find $WORK_DIR -type d -iname 'swift-DEVELOPMENT-SNAPSHOT-*'`;
-  do
-    export PATH=${PATH#${INSTALL_DIR}}
-  done
-  # Remove any older versions of the Swift binaries from the file system
-  find $WORK_DIR -name 'swift-DEVELOPMENT-SNAPSHOT-*' | xargs rm -rf
-  # Install Swift compiler
-  cd $WORK_DIR
-  wget https://swift.org/builds/development/$UBUNTU_VERSION_NO_DOTS/$SWIFT_SNAPSHOT/$SWIFT_SNAPSHOT-$UBUNTU_VERSION.tar.gz
-  tar xzvf $SWIFT_SNAPSHOT-$UBUNTU_VERSION.tar.gz
-  export PATH=$WORK_DIR/$SWIFT_SNAPSHOT-$UBUNTU_VERSION/usr/bin:$PATH
-  swiftc -h
+echo ">> Installing '${SWIFT_SNAPSHOT}'..."
+# Install Swift compiler
+cd $WORK_DIR
+wget https://swift.org/builds/development/$UBUNTU_VERSION_NO_DOTS/$SWIFT_SNAPSHOT/$SWIFT_SNAPSHOT-$UBUNTU_VERSION.tar.gz
+tar xzvf $SWIFT_SNAPSHOT-$UBUNTU_VERSION.tar.gz
+export PATH=$WORK_DIR/$SWIFT_SNAPSHOT-$UBUNTU_VERSION/usr/bin:$PATH
+swiftc -h
   # Clone and install swift-corelibs-libdispatch
-  echo ">> Installing swift-corelibs-libdispatch..."
-  # Remove any older versions of the Swift binaries from the file system
-  find $WORK_DIR -name 'swift-corelibs-libdispatch' | xargs rm -rf
-  echo "Get the ${LIBDISPATCH_BRANCH} branch"
-  git clone -b ${LIBDISPATCH_BRANCH}  https://github.com/apple/swift-corelibs-libdispatch.git
-  echo "Compiling libdispatch"
-  cd swift-corelibs-libdispatch && git submodule init && git submodule update && sh ./autogen.sh && ./configure --with-swift-toolchain=$WORK_DIR/$SWIFT_SNAPSHOT-$UBUNTU_VERSION/usr --prefix=$WORK_DIR/$SWIFT_SNAPSHOT-$UBUNTU_VERSION/usr && make && make install
-  echo "Finished building libdispatch"
-  # Return to previous directory
-  cd -
-fi
+echo ">> Installing swift-corelibs-libdispatch..."
+echo "Get the ${LIBDISPATCH_BRANCH} branch"
+git clone -b ${LIBDISPATCH_BRANCH}  https://github.com/apple/swift-corelibs-libdispatch.git
+echo "Compiling libdispatch"
+cd swift-corelibs-libdispatch && git submodule init && git submodule update && sh ./autogen.sh && ./configure --with-swift-toolchain=$WORK_DIR/$SWIFT_SNAPSHOT-$UBUNTU_VERSION/usr --prefix=$WORK_DIR/$SWIFT_SNAPSHOT-$UBUNTU_VERSION/usr && make && make install
+echo "Finished building libdispatch"
+# Return to previous directory
+cd -

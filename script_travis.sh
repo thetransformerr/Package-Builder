@@ -24,7 +24,8 @@ set -e
 
 # Set variables
 branch=$1
+build_dir=$2
 
 echo ">> Let's build and test the '$branch' branch for $project."
-./Package-Builder/build-package.sh
+./Package-Builder/build-package.sh $branch $build_dir
 echo ">> Build and tests completed. See above for status."
