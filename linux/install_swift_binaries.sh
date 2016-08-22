@@ -32,7 +32,7 @@ sudo apt-get -y install clang-3.8 lldb-3.8 libicu-dev libkqueue-dev libtool libc
 echo "Setting variables"
 export WORK_DIR=$1
 echo $WORK_DIR
-export LIBDISPATCH_BRANCH="swift-3.0-preview-5-branch"
+export LIBDISPATCH_BRANCH="master"
 # Set compiler environment variables
 export CC="/usr/bin/clang-3.8"
 export CXX="/usr/bin/clang-3.8"
