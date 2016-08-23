@@ -36,11 +36,6 @@ sudo apt-get -y install clang-3.8 lldb-3.8 libicu-dev libkqueue-dev libtool libc
 sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.8 100
 sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.8 100
 
-export CC="/usr/bin/clang-3.8"
-export CXX="/usr/bin/clang-3.8"
-export OBJC="/usr/bin/clang-3.8"
-export OBJCXX="/usr/bin/clang-3.8"
-
 WORK_DIR=$1
 
 THRESHOLD_DATE="20160801"
