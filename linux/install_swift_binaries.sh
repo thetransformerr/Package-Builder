@@ -37,6 +37,8 @@ echo "update-alternatives test"
 
 which clang
 which clang++
+which cc
+which c++
 
 #ls -la /usr/bin/clang-3.8
 #sudo update-alternatives --install /usr/bin/cc cc /usr/bin/clang-3.8 100
