@@ -44,7 +44,8 @@ which c++
 
 #PATH=`echo $PATH | sed -e 's/:\/home\/wrong\/dir\/$//'`
 #PATH=`echo $PATH | sed -e 's/:\/usr/local/clang-3.5.0/bin\/$//'`
-export PATH=`echo ${PATH} | awk -v RS=: -v ORS=: '/clang-3.5.0/ {next} {print}'`
+#export PATH=`echo ${PATH} | awk -v RS=: -v ORS=: '/clang-3.5.0/ {next} {print}'`
+export PATH=`echo ${PATH} | awk -v RS=: -v ORS=: '/clang/ {next} {print}'`
 echo $PATH
 
 #ls -la /usr/bin/clang-3.8
