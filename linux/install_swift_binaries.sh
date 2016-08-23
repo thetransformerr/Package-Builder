@@ -43,8 +43,8 @@ which c++
 #ls -la /usr/bin/clang-3.8
 #sudo update-alternatives --install /usr/bin/cc cc /usr/bin/clang-3.8 100
 #sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-3.8 100
-sudo update-alternatives --install /usr/local/clang-3.5.0/bin/clang clang /usr/bin/clang-3.8 100
-sudo update-alternatives --install /usr/local/clang-3.5.0/bin/clang++ clang++ /usr/bin/clang++-3.8 100
+#sudo update-alternatives --install /usr/local/clang-3.5.0/bin/clang clang /usr/bin/clang-3.8 100
+#sudo update-alternatives --install /usr/local/clang-3.5.0/bin/clang++ clang++ /usr/bin/clang++-3.8 100
 
 which clang++-3.8
 which clang-3.8
@@ -53,8 +53,8 @@ which clang++
 
 clang -v
 clang++ -v
-#export CC="/usr/bin/clang-3.8"
-#export CXX="/usr/bin/clang-3.8"
+export CC="/usr/bin/clang-3.8"
+export CXX="/usr/bin/clang-3.8"
 #export OBJC="/usr/bin/clang-3.8"
 #export OBJCXX="/usr/bin/clang-3.8"
 
