@@ -40,7 +40,9 @@ which clang++
 which cc
 which c++
 
-PATH=$(echo "$PATH" | sed -e 's/:/usr/local/clang-3.5.0/bin$//')
+#PATH=$(echo "$PATH" | sed -e 's/:/usr/local/clang-3.5.0/bin$//')
+
+PATH=`echo $PATH | sed -e 's/:\/home\/wrong\/dir\/$//'`
 echo $PATH
 
 #ls -la /usr/bin/clang-3.8
