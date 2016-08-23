@@ -33,10 +33,8 @@ sudo apt-get update
 sudo apt-get -y install clang-3.8 lldb-3.8 libicu-dev libkqueue-dev libtool libcurl4-openssl-dev libbsd-dev libblocksruntime-dev build-essential libssl-dev
 
 # Set clang 3.8 as default
-sudo update-alternatives --config clang++
-sudo update-alternatives --config clang
-sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.8 100
-sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.8 100
+sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.8 1
+sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.8 1
 
 #export CC="/usr/bin/clang-3.8"
 #export CXX="/usr/bin/clang-3.8"
