@@ -58,6 +58,8 @@ clang++ -v
 #export OBJC="/usr/bin/clang-3.8"
 #export OBJCXX="/usr/bin/clang-3.8"
 
+ls -la /usr/bin/clang-3.8
+
 WORK_DIR=$1
 
 THRESHOLD_DATE="20160801"
