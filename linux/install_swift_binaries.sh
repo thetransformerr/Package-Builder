@@ -34,6 +34,9 @@ sudo apt-get -y install clang-3.8 lldb-3.8 libicu-dev libkqueue-dev libtool libc
 
 # Set clang 3.8 as default
 echo "update-alternatives test"
+which clang++-3.8
+which clang-3.8
+ls -la /usr/bin/clang-3.8
 sudo update-alternatives --install /usr/bin/cc cc /usr/bin/clang-3.8 100
 sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-3.8 100
 sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.8 100
