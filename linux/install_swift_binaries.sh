@@ -30,18 +30,24 @@ set -e
 set -o verbose
 
 sudo apt-get update
-sudo apt-get -y install automake build-essential clang-3.8 lldb-3.8 curl gcc-4.8 git g++-4.8 libblocksruntime-dev libbsd-dev libglib2.0-dev libpython2.7 libicu-dev libkqueue-dev libtool lsb-core openssh-client vim wget binutils-gold libcurl4-openssl-dev openssl libssl-dev
+sudo apt-get -y install clang clang-3.8 lldb-3.8 libicu-dev libkqueue-dev libtool libcurl4-openssl-dev libbsd-dev libblocksruntime-dev build-essential libwrap0-dev libssl-dev libc-ares-dev uuid-dev xsltproc
 
 # Set clang 3.8 as default
 echo "update-alternatives test"
-which clang++-3.8
-which clang-3.8
+
 which clang
+which clang++
+
 #ls -la /usr/bin/clang-3.8
 #sudo update-alternatives --install /usr/bin/cc cc /usr/bin/clang-3.8 100
 #sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-3.8 100
 sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.8 100
 sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.8 100
+
+which clang++-3.8
+which clang-3.8
+which clang
+which clang++
 
 #export CC="/usr/bin/clang-3.8"
 #export CXX="/usr/bin/clang-3.8"
