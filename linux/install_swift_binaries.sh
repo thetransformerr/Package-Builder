@@ -51,6 +51,7 @@ which clang-3.8
 which clang
 which clang++
 
+clang -v
 #export CC="/usr/bin/clang-3.8"
 #export CXX="/usr/bin/clang-3.8"
 #export OBJC="/usr/bin/clang-3.8"
