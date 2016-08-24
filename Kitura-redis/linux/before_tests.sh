@@ -19,10 +19,13 @@
 # If any commands fail, we want the shell script to exit immediately.
 set -e
 
-sudo aa-complain /etc/apparmor.d/sbin.dhclient
-
 # Install redis
 sudo apt-get update -y
+
+sudo apt-get install apparmor-utils -y
+sudo aa-complain /etc/apparmor.d/sbin.dhclient
+
+
 sudo apt-get upgrade -y
 sudo apt-get install -y redis-server
 
