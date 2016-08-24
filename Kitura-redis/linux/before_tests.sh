@@ -19,10 +19,16 @@
 # If any commands fail, we want the shell script to exit immediately.
 set -e
 
+# disable AppArmor
+sudo /etc/init.d/apparmor stop
+
 # Install redis
 sudo apt-get update -y
 sudo apt-get upgrade -y
 sudo apt-get install -y redis-server
+
+# enable AppArmor
+sudo /etc/init.d/apparmor start
 
 # Set environment variable that points to conf file
 export REDIS_CONF_FILE=/etc/redis/redis.conf
