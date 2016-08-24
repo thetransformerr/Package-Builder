@@ -19,12 +19,14 @@
 # If any commands fail, we want the shell script to exit immediately.
 set -e
 
+sudo apt-get update -y
+
 # remove AppArmor
 sudo service apparmor stop
 sudo update-rc.d -f apparmor remove
+sudo apt-get remove apparmor apparmor-utils -y
 
 # Install redis
-sudo apt-get update -y
 sudo apt-get upgrade -y
 sudo apt-get install -y redis-server
 
