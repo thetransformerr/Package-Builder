@@ -22,7 +22,7 @@ set -e
 # Install redis
 sudo apt-get update -y
 
-sudo apt-get install apparmor-utils -y
+sudo apt-get install apparmor apparmor-profiles apparmor-utils -y
 sudo aa-complain /etc/apparmor.d/sbin.dhclient
 
 
